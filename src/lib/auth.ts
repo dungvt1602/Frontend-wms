@@ -1,0 +1,2 @@
+// next-auth configuration
+export {};
