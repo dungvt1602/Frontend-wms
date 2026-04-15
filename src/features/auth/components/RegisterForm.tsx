@@ -70,6 +70,12 @@ export default function RegisterForm() {
   const [isLoading, setLoading] = useState(false);
   const [success, setSuccess]   = useState(false);
   const [errors, setErrors]     = useState<FormErrors>({});
+  const [isLeaving, setIsLeaving] = useState(false);
+
+  function navigate(path: string) {
+    setIsLeaving(true);
+    setTimeout(() => router.push(path), 350);
+  }
 
   function set<K extends keyof FormState>(key: K, val: FormState[K]) {
     setForm((prev) => ({ ...prev, [key]: val }));
@@ -168,7 +174,7 @@ export default function RegisterForm() {
             <p className="font-semibold text-indigo-700">{form.email}</p>
           </div>
           <button
-            onClick={() => router.push("/login")}
+            onClick={() => navigate("/login")}
             className="w-full h-11 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90"
             style={{ background: "linear-gradient(135deg,#6366f1,#4f46e5)", boxShadow: "0 4px 15px rgba(99,102,241,0.35)" }}
           >
@@ -180,7 +186,10 @@ export default function RegisterForm() {
   }
 
   return (
-    <div className="min-h-screen flex">
+    <div className={cn(
+      "min-h-screen flex transition-all duration-300 ease-in-out",
+      isLeaving ? "opacity-0 -translate-x-4" : "opacity-100 translate-x-0"
+    )}>
 
       {/* ════════════ LEFT — Branding ════════════ */}
       <div className="hidden lg:flex lg:w-[46%] relative flex-col justify-between p-12 overflow-hidden"
@@ -282,7 +291,7 @@ export default function RegisterForm() {
             </h2>
             <p className="text-slate-400 text-sm">
               Đã có tài khoản?{" "}
-              <button type="button" onClick={() => router.push("/login")}
+              <button type="button" onClick={() => navigate("/login")}
                       className="text-indigo-600 hover:text-indigo-700 font-medium transition-colors">
                 Đăng nhập ngay
               </button>

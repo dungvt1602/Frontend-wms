@@ -30,6 +30,12 @@ export default function LoginForm() {
   const [remember, setRemember]         = useState(false);
   const [isLoading, setIsLoading]       = useState(false);
   const [errors, setErrors]             = useState<FormErrors>({});
+  const [isLeaving, setIsLeaving]       = useState(false);
+
+  function navigate(path: string) {
+    setIsLeaving(true);
+    setTimeout(() => router.push(path), 350);
+  }
 
   function validate(): boolean {
     const e: FormErrors = {};
@@ -57,7 +63,10 @@ export default function LoginForm() {
   }
 
   return (
-    <div className="min-h-screen flex">
+    <div className={cn(
+      "min-h-screen flex transition-all duration-300 ease-in-out",
+      isLeaving ? "opacity-0 translate-x-4" : "opacity-100 translate-x-0"
+    )}>
 
       {/* ════════════════════════════════
           LEFT — Branding & Stats Panel
@@ -154,11 +163,37 @@ export default function LoginForm() {
           </div>
 
           {/* Heading */}
-          <div className="space-y-1">
-            <h2 className="text-[1.6rem] font-bold text-slate-900 tracking-tight">
-              Chào mừng trở lại 👋
-            </h2>
-            <p className="text-slate-400 text-sm">Nhập thông tin để truy cập hệ thống</p>
+          <div className="space-y-4">
+            {/* Illustration */}
+            <div className="flex items-center gap-3">
+              {/* WMS Brand mark */}
+              <div className="relative">
+                <div className="w-14 h-14 rounded-2xl flex items-center justify-center"
+                     style={{ background: "linear-gradient(135deg,#6366f1,#4f46e5)", boxShadow: "0 8px 24px rgba(99,102,241,0.35)" }}>
+                  <Warehouse className="h-7 w-7 text-white" />
+                </div>
+                {/* Online dot */}
+                <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-emerald-400 border-2 border-white" />
+              </div>
+              {/* Mini stats */}
+              <div className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                <span className="text-xs text-slate-500">Hệ thống hoạt động bình thường</span>
+              </div>
+            </div>
+
+            <div>
+              <h2 className="text-[1.6rem] font-bold text-slate-900 tracking-tight">
+                Chào mừng trở lại
+              </h2>
+              <p className="text-slate-400 text-sm mt-0.5">
+                Chưa có tài khoản?{" "}
+                <button type="button" onClick={() => navigate("/register")}
+                        className="text-indigo-600 hover:text-indigo-700 font-medium transition-colors">
+                  Đăng ký ngay
+                </button>
+              </p>
+            </div>
           </div>
 
           {/* Error banner */}
