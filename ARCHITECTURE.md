@@ -1,0 +1,299 @@
+# Kiến trúc hệ thống — WMS Frontend
+
+Tài liệu mô tả kiến trúc tổng thể, cấu trúc thư mục và nhiệm vụ của từng thành phần trong project WMS Frontend.
+
+---
+
+## Tổng quan kiến trúc
+
+```
+Người dùng (Browser)
+        │
+        ▼
+┌───────────────────────┐
+│    Next.js 16         │  ← App Router, Server Components
+│    (Frontend Layer)   │
+│                       │
+│  ┌─────────────────┐  │
+│  │  Auth Routes    │  │  /login, /register
+│  │  (auth)         │  │
+│  └─────────────────┘  │
+│  ┌─────────────────┐  │
+│  │ Dashboard Routes│  │  /dashboard, /inventory, ...
+│  │  (dashboard)    │  │
+│  └─────────────────┘  │
+│  ┌─────────────────┐  │
+│  │   API Routes    │  │  /api/inventory, /api/orders
+│  └─────────────────┘  │
+└──────────┬────────────┘
+           │ Axios (HTTP)
+           ▼
+┌───────────────────────┐
+│    Backend API        │  ← http://localhost:8000/api
+│    (Chưa triển khai)  │
+└───────────────────────┘
+```
+
+---
+
+## Luồng xác thực
+
+```
+/login hoặc /register
+        │
+        ▼
+   LoginForm / RegisterForm
+        │
+        │ (TODO) next-auth signIn()
+        ▼
+   Backend API xác thực
+        │
+        ▼
+   JWT Token → lưu session
+        │
+        ▼
+   middleware.ts kiểm tra token
+        │
+   ┌────┴────┐
+   │         │
+   ✓ Hợp lệ  ✗ Không hợp lệ
+   │         │
+   ▼         ▼
+Dashboard  /login
+```
+
+---
+
+## Hệ thống Layout lồng nhau (Nested Layouts)
+
+Next.js App Router sử dụng các `layout.tsx` lồng nhau để bọc nội dung trang. Mỗi trang chỉ cần lo **nội dung bên trong**, các lớp bên ngoài tự động được áp dụng.
+
+```
+src/app/
+│
+├── layout.tsx                    ← Lớp 1: ROOT - bọc TOÀN BỘ app
+│                                   (html, body, font Inter, metadata)
+│
+├── (dashboard)/
+│   ├── layout.tsx                ← Lớp 2: DASHBOARD - bọc tất cả trang trong dashboard
+│   │                               (Sidebar + Header)
+│   │
+│   └── inventory/
+│       └── page.tsx              ← Lớp 3: NỘI DUNG - chỉ lo phần nội dung trang
+```
+
+Khi người dùng truy cập `/inventory`, thực tế render như sau:
+
+```
+┌─────────────────────────────────────────┐
+│  layout.tsx (Root)                      │
+│  <html> <body> font Inter               │
+│  ┌───────────────────────────────────┐  │
+│  │  (dashboard)/layout.tsx           │  │
+│  │  ┌──────────┬────────────────┐   │  │
+│  │  │ Sidebar  │ Header         │   │  │
+│  │  │          ├────────────────┤   │  │
+│  │  │          │ inventory/     │   │  │
+│  │  │          │ page.tsx       │   │  │
+│  │  │          │ (nội dung)     │   │  │
+│  │  └──────────┴────────────────┘   │  │
+│  └───────────────────────────────────┘  │
+└─────────────────────────────────────────┘
+```
+
+> **Quy tắc:** `page.tsx` chỉ viết nội dung bên trong. Sidebar và Header được `(dashboard)/layout.tsx` lo tự động cho **tất cả** các trang dashboard mà không cần lặp lại code.
+
+---
+
+## Phân lớp State Management
+
+```
+┌─────────────────────────────────────────────┐
+│              STATE TRONG APP                │
+│                                             │
+│  ┌─────────────────────────────────────┐   │
+│  │  SERVER STATE (dữ liệu từ API)      │   │
+│  │  → TanStack Query                   │   │
+│  │  Inventory, Orders, Suppliers...    │   │
+│  └─────────────────────────────────────┘   │
+│                                             │
+│  ┌─────────────────────────────────────┐   │
+│  │  CLIENT STATE (UI)                  │   │
+│  │  → Zustand                          │   │
+│  │  sidebarOpen, user info...          │   │
+│  └─────────────────────────────────────┘   │
+│                                             │
+│  ┌─────────────────────────────────────┐   │
+│  │  LOCAL STATE                        │   │
+│  │  → useState (React)                 │   │
+│  │  Form input, modal open, loading... │   │
+│  └─────────────────────────────────────┘   │
+└─────────────────────────────────────────────┘
+```
+
+---
+
+## Cấu trúc thư mục chi tiết
+
+```
+wms-frontend/
+│
+├── src/
+│   ├── app/                        # Next.js App Router — định nghĩa routes
+│   │   │
+│   │   ├── (auth)/                 # Route group: trang xác thực
+│   │   │   │                       # Dấu () = nhóm route, KHÔNG ảnh hưởng URL
+│   │   │   ├── layout.tsx          # Layout bọc login/register (full-screen)
+│   │   │   ├── login/
+│   │   │   │   └── page.tsx        # Route: /login
+│   │   │   ├── register/
+│   │   │   │   └── page.tsx        # Route: /register
+│   │   │   └── logout/
+│   │   │       └── page.tsx        # Route: /logout
+│   │   │
+│   │   ├── (dashboard)/            # Route group: các trang cần đăng nhập
+│   │   │   ├── layout.tsx          # Layout bọc Sidebar + Header
+│   │   │   ├── dashboard/
+│   │   │   │   └── page.tsx        # Route: /dashboard — Trang tổng quan
+│   │   │   ├── inventory/
+│   │   │   │   ├── page.tsx        # Route: /inventory — Danh sách tồn kho
+│   │   │   │   └── [id]/
+│   │   │   │       └── page.tsx    # Route: /inventory/123 — Chi tiết sản phẩm
+│   │   │   ├── orders/
+│   │   │   │   └── page.tsx        # Route: /orders
+│   │   │   ├── warehouse/
+│   │   │   │   └── page.tsx        # Route: /warehouse
+│   │   │   ├── suppliers/
+│   │   │   │   └── page.tsx        # Route: /suppliers
+│   │   │   ├── reports/
+│   │   │   │   └── page.tsx        # Route: /reports
+│   │   │   └── settings/
+│   │   │       └── page.tsx        # Route: /settings
+│   │   │
+│   │   ├── api/                    # API Routes nội bộ Next.js (chạy server-side)
+│   │   │   ├── inventory/
+│   │   │   │   └── route.ts        # GET/POST /api/inventory
+│   │   │   └── orders/
+│   │   │       └── route.ts        # GET/POST /api/orders
+│   │   │
+│   │   ├── layout.tsx              # Root layout: font, html, body, metadata
+│   │   ├── page.tsx                # Route: / → redirect sang /dashboard
+│   │   └── globals.css             # CSS toàn cục, Tailwind imports, theme tokens
+│   │
+│   ├── components/                 # Components dùng chung toàn app
+│   │   ├── ui/                     # Components shadcn/ui (base components)
+│   │   │   ├── button.tsx          # Button với các variants
+│   │   │   ├── card.tsx            # Card container
+│   │   │   ├── input.tsx           # Input field
+│   │   │   ├── badge.tsx           # Badge/tag
+│   │   │   └── table.tsx           # Table components
+│   │   ├── layout/                 # Components bố cục chính
+│   │   │   ├── Sidebar.tsx         # Menu điều hướng trái, có thu gọn
+│   │   │   └── Header.tsx          # Thanh trên: search, notification, user
+│   │   └── common/                 # Components tái sử dụng chung (LoadingSpinner, EmptyState...)
+│   │
+│   ├── features/                   # Logic theo từng domain nghiệp vụ
+│   │   ├── auth/                   # Xác thực người dùng
+│   │   │   └── components/
+│   │   │       ├── LoginForm.tsx   # Form đăng nhập
+│   │   │       └── RegisterForm.tsx# Form đăng ký
+│   │   ├── inventory/              # Quản lý tồn kho
+│   │   │   ├── components/         # UI components riêng của inventory
+│   │   │   ├── hooks/              # Custom hooks: useInventory, useUpdateStock...
+│   │   │   ├── api/                # Hàm gọi API inventory
+│   │   │   └── types/              # TypeScript types: Product, StockItem...
+│   │   ├── orders/                 # Quản lý đơn hàng
+│   │   ├── warehouse/              # Quản lý kho bãi
+│   │   ├── suppliers/              # Nhà cung cấp
+│   │   └── reports/                # Báo cáo & thống kê
+│   │
+│   ├── lib/                        # Thư viện tiện ích dùng chung
+│   │   ├── api-client.ts           # Axios instance đã cấu hình sẵn baseURL + headers
+│   │   ├── auth.ts                 # Cấu hình NextAuth (providers, callbacks)
+│   │   └── utils.ts                # Hàm cn() để merge Tailwind class names
+│   │
+│   ├── hooks/                      # Custom React hooks dùng chung toàn app
+│   │   └── (vd: useDebounce, useLocalStorage...)
+│   │
+│   ├── store/                      # Zustand global state
+│   │   ├── index.ts                # Store chính: sidebarOpen, user info
+│   │   └── ui.store.ts             # Store UI: theme, modal states
+│   │
+│   └── types/                      # TypeScript types dùng chung
+│       └── index.ts                # ApiResponse<T>, UserRole, ...
+│
+├── middleware.ts                   # Chạy trước mọi request — kiểm tra auth token
+├── next.config.ts                  # Cấu hình Next.js
+├── components.json                 # Cấu hình shadcn/ui
+├── postcss.config.mjs              # Cấu hình PostCSS cho Tailwind v4
+├── tsconfig.json                   # Cấu hình TypeScript
+├── .env.local                      # Biến môi trường (không commit lên git)
+├── README.md                       # Hướng dẫn cài đặt và chạy project
+└── ARCHITECTURE.md                 # Tài liệu kiến trúc (file này)
+```
+
+---
+
+## Nhiệm vụ các thư mục chính
+
+### `src/app/` — Routing Layer
+Định nghĩa tất cả routes của ứng dụng theo Next.js App Router. Mỗi `page.tsx` là một route, mỗi `layout.tsx` bọc giao diện cho nhóm route đó.
+
+### `src/components/` — Shared UI
+Chứa components **không gắn với domain cụ thể**, dùng được ở mọi nơi trong app.
+- `ui/` — Các component gốc từ shadcn (thay đổi ít)
+- `layout/` — Sidebar, Header — khung giao diện chính
+- `common/` — LoadingSpinner, EmptyState, Pagination...
+
+### `src/features/` — Domain Logic
+Kiến trúc **Feature-based**: mỗi nghiệp vụ (inventory, orders...) có đủ 4 lớp:
+- `components/` — UI riêng của feature đó
+- `hooks/` — Data fetching hooks (dùng TanStack Query)
+- `api/` — Hàm gọi API qua `api-client.ts`
+- `types/` — TypeScript interfaces của domain
+
+### `src/lib/` — Utilities
+Các hàm/config tiện ích được tái sử dụng:
+- `api-client.ts` — Mọi chỗ gọi API đều import từ đây
+- `auth.ts` — Cấu hình NextAuth tập trung
+- `utils.ts` — `cn()` helper merge Tailwind classes
+
+### `src/store/` — Global State (Zustand)
+Chỉ lưu **client UI state** (không phải dữ liệu từ API):
+- Trạng thái sidebar đóng/mở
+- Thông tin user đang đăng nhập
+- Cài đặt theme
+
+### `src/types/` — TypeScript Definitions
+Các interface/type **dùng chung** giữa nhiều features:
+- `ApiResponse<T>` — Chuẩn response từ backend
+- `UserRole` — Các vai trò trong hệ thống
+
+### `src/hooks/` — Shared Hooks
+Custom React hooks **không thuộc về feature cụ thể**:
+- `useDebounce` — Delay search input
+- `useLocalStorage` — Persist state xuống localStorage
+
+---
+
+## Quy tắc đặt tên
+
+| Loại | Quy tắc | Ví dụ |
+|---|---|---|
+| Component | PascalCase | `LoginForm.tsx`, `Sidebar.tsx` |
+| Hook | camelCase với `use` | `useInventory.ts` |
+| Store | camelCase với `.store` | `ui.store.ts` |
+| Type/Interface | PascalCase | `ApiResponse`, `UserRole` |
+| Route page | `page.tsx` (cố định) | `src/app/(dashboard)/orders/page.tsx` |
+| Route layout | `layout.tsx` (cố định) | `src/app/(dashboard)/layout.tsx` |
+
+---
+
+## Nguyên tắc kiến trúc
+
+1. **Server State** → TanStack Query (cache, refetch tự động)
+2. **Client UI State** → Zustand (sidebar, theme...)
+3. **Local State** → useState (form, modal, loading)
+4. **Không** nhét dữ liệu API vào Zustand
+5. **Feature-first**: mỗi domain tự chứa đủ components, hooks, api, types của nó
+6. **Import alias**: dùng `@/` thay vì đường dẫn tương đối `../../`
