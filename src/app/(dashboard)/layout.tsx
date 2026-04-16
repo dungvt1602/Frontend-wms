@@ -1,5 +1,6 @@
 import Sidebar from "@/components/layout/Sidebar";
 import Header  from "@/components/layout/Header";
+import ChatBot from "@/components/chatbot/ChatBot";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -11,6 +12,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           {children}
         </main>
       </div>
+      <ChatBot />
     </div>
   );
 }

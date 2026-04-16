@@ -1,3 +1,4 @@
+import type { ElementType } from "react";
 import {
   Package, ClipboardList, AlertTriangle,
   TrendingUp, ArrowUpRight, ArrowDownRight,
@@ -33,7 +34,7 @@ const chartData = [65, 78, 52, 91, 73, 88, 95];
 const chartDays = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
 const maxVal    = Math.max(...chartData);
 
-const statusMap: Record<string, { label: string; icon: React.ElementType; cls: string }> = {
+const statusMap: Record<string, { label: string; icon: ElementType; cls: string }> = {
   completed: { label: "Hoàn thành", icon: CheckCircle2, cls: "text-emerald-700 bg-emerald-50" },
   shipping:  { label: "Đang giao",  icon: Loader2,      cls: "text-blue-600 bg-blue-50"       },
   pending:   { label: "Chờ xử lý", icon: Clock,        cls: "text-amber-600 bg-amber-50"     },
@@ -46,7 +47,7 @@ export default function DashboardPage() {
   const greeting = hour < 12 ? "Chào buổi sáng" : hour < 18 ? "Chào buổi chiều" : "Chào buổi tối";
 
   return (
-    <div className="space-y-6 max-w-[1400px]">
+    <div className="space-y-6">
 
       {/* Greeting */}
       <div>

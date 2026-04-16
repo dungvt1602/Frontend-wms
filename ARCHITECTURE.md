@@ -289,6 +289,160 @@ Custom React hooks **không thuộc về feature cụ thể**:
 
 ---
 
+## Luồng gọi API Backend
+
+Component không bao giờ gọi API trực tiếp. Mọi request đi qua **3 lớp**:
+
+```
+Component
+  └── dùng hook (useInventory)
+        └── hook gọi API function (getInventory)
+              └── API function dùng api-client (axios)
+                    └── Backend http://localhost:8000/api
+```
+
+| Lớp | Vị trí | Nhiệm vụ |
+|---|---|---|
+| `api-client.ts` | `src/lib/` | Axios config, JWT interceptor, base URL |
+| `api/index.ts` | `src/features/{domain}/api/` | Hàm fetch / post / patch / delete |
+| `useXxx.ts` | `src/features/{domain}/hooks/` | TanStack Query — cache, loading, error |
+| Component | `src/features/{domain}/components/` | Chỉ gọi hook, không gọi API trực tiếp |
+
+---
+
+## Cấu trúc chi tiết từng Feature
+
+---
+
+### Feature: Inventory (`/inventory`)
+
+```
+src/
+├── app/(dashboard)/inventory/
+│   ├── page.tsx                      ← Trang chính — tabs: Tồn kho / Lịch sử điều chỉnh
+│   └── [id]/
+│       └── page.tsx                  ← (Dự phòng) Chi tiết tồn kho 1 mặt hàng
+│
+└── features/inventory/
+    ├── types/
+    │   └── index.ts
+    │       ├── StockItem             ← id, name, warehouse, current, min, unit, lastIn, lastOut
+    │       ├── StockStatus           ← "ok" | "low" | "out"
+    │       ├── LogType               ← "adjust_increase" | "adjust_decrease" | "transfer"
+    │       ├── InventoryLog          ← id, type, productId, qty, warehouse, reason, note, createdAt, createdBy
+    │       └── getStatus()           ← helper: current + min → StockStatus
+    │
+    ├── components/
+    │   ├── InventoryStats.tsx        ← 3 KPI card: Đủ hàng / Sắp hết / Hết hàng
+    │   ├── InventoryFilters.tsx      ← Search + tab kho (A/B/C) + dropdown trạng thái
+    │   ├── InventoryTable.tsx        ← Bảng tồn kho, progress bar, sort, shared Pagination
+    │   ├── InventoryLogTable.tsx     ← Bảng lịch sử: Tăng / Giảm / Chuyển kho, badge màu
+    │   ├── AdjustStockModal.tsx      ← Modal điều chỉnh tồn kho (tăng/giảm + lý do + log)
+    │   └── TransferStockModal.tsx    ← Modal chuyển kho nội bộ (kho A→B, preview số lượng + log)
+    │
+    ├── hooks/                        ← (Chưa triển khai — chờ backend)
+    └── api/                          ← (Chưa triển khai — chờ backend)
+```
+
+**Luồng tính năng:**
+```
+Tab "Tồn kho"           → InventoryStats + InventoryFilters + InventoryTable
+Tab "Lịch sử (N)"       → InventoryLogTable (N = số log hiện có)
+
+Button "Điều chỉnh"     → AdjustStockModal → onLog() → thêm vào đầu danh sách log
+Button "Chuyển kho"     → TransferStockModal → onLog() → thêm vào đầu danh sách log
+```
+
+---
+
+### Feature: Products (`/products`)
+
+```
+src/
+├── app/(dashboard)/products/
+│   ├── page.tsx                      ← Danh sách sản phẩm — filter, sort, phân trang
+│   └── [id]/
+│       └── page.tsx                  ← Chi tiết sản phẩm — form edit + tồn kho + lịch sử
+│
+└── features/products/
+    ├── types/
+    │   └── index.ts
+    │       ├── Product               ← id, name, category, unit, buyPrice, sellPrice, supplier, status
+    │       ├── StockByWarehouse      ← warehouse, current, min, capacity
+    │       ├── ProductHistory        ← id, type, qty, orderId, warehouse, date, partner
+    │       └── ProductDetail         ← extends Product + description + stock[] + history[]
+    │
+    ├── components/
+    │   ├── ProductFilters.tsx        ← Search + tab danh mục + dropdown trạng thái
+    │   ├── ProductTable.tsx          ← Bảng sản phẩm, context menu (Chỉnh sửa → /products/[id])
+    │   ├── AddProductModal.tsx       ← Modal thêm sản phẩm mới (createPortal, validation)
+    │   ├── ProductDetailHeader.tsx   ← Breadcrumb + badge trạng thái + nút Lưu/Huỷ
+    │   ├── ProductInfoForm.tsx       ← Form edit: tên, danh mục, giá, đơn vị, NCC, mô tả, trạng thái
+    │   ├── ProductStockInfo.tsx      ← Tồn kho theo từng kho, progress bar, cảnh báo sắp hết
+    │   └── ProductHistoryTable.tsx   ← Lịch sử nhập/xuất: +/- số lượng, màu phân biệt
+    │
+    ├── hooks/                        ← (Chưa triển khai — chờ backend)
+    └── api/                          ← (Chưa triển khai — chờ backend)
+```
+
+**Luồng tính năng:**
+```
+/products               → ProductFilters + ProductTable
+  → hover row → ⋯      → context menu
+    → "Chỉnh sửa"       → router.push("/products/SP001")
+    → "Xoá sản phẩm"    → (TODO: confirm modal)
+
+/products/[id]          → ProductDetailHeader
+                           + ProductInfoForm   (col trái)
+                           + ProductStockInfo  (col phải, 300px)
+                           + ProductHistoryTable (full width)
+  → "Lưu thay đổi"      → loading 900ms → "Đã lưu!"
+  → "Huỷ"               → router.push("/products")
+
+Button "+ Thêm SP"      → AddProductModal (createPortal) → validation → lưu
+```
+
+---
+
+### Feature: Warehouse (`/warehouse`)
+
+```
+src/
+├── app/(dashboard)/warehouse/
+│   └── page.tsx                      ← Danh sách kho + banner bảo trì
+│
+└── features/warehouse/
+    ├── types/
+    │   └── index.ts
+    │       ├── Zone                  ← id, name, type, slots, used, temp
+    │       └── Warehouse             ← id, name, address, manager, phone, totalArea, status, features, zones[]
+    │
+    ├── components/
+    │   ├── WarehouseStats.tsx        ← 4 KPI card: tổng kho, đang hoạt động, bảo trì, tổng diện tích
+    │   └── WarehouseCard.tsx         ← Card accordion: thông tin kho + bảng zone với capacity bar
+    │
+    ├── hooks/                        ← (Chưa triển khai — chờ backend)
+    └── api/                          ← (Chưa triển khai — chờ backend)
+```
+
+**Luồng tính năng:**
+```
+/warehouse              → WarehouseStats (tổng quan)
+                          + WarehouseCard × N (mỗi kho 1 card)
+                            → Click header card  → accordion mở/đóng
+                            → Bảng zone          → capacity bar, badge trạng thái
+                          + Banner cảnh báo bảo trì (nếu có kho maintenance)
+```
+
+**Trạng thái kho (`Warehouse.status`):**
+| Giá trị | Ý nghĩa |
+|---|---|
+| `active` | Đang hoạt động bình thường |
+| `maintenance` | Đang bảo trì, hạn chế nhập/xuất |
+| `inactive` | Tạm ngừng hoạt động |
+
+---
+
 ## Nguyên tắc kiến trúc
 
 1. **Server State** → TanStack Query (cache, refetch tự động)
@@ -297,3 +451,4 @@ Custom React hooks **không thuộc về feature cụ thể**:
 4. **Không** nhét dữ liệu API vào Zustand
 5. **Feature-first**: mỗi domain tự chứa đủ components, hooks, api, types của nó
 6. **Import alias**: dùng `@/` thay vì đường dẫn tương đối `../../`
+7. **Component không gọi API trực tiếp** — luôn đi qua hook → api function → api-client

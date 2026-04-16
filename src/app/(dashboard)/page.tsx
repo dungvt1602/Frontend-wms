@@ -1,9 +1,12 @@
+import type { ElementType } from "react";
 import {
   Package, ClipboardList, AlertTriangle,
   TrendingUp, ArrowUpRight, ArrowDownRight,
   Clock, CheckCircle2, XCircle, Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import AllOrdersButton from "@/features/dashboard/components/AllOrdersButton";
+import type { DashboardOrder } from "@/features/dashboard/components/RecentOrdersModal";
 
 /* ═══════════════ Mock data ═══════════════ */
 const stats = [
@@ -13,13 +16,22 @@ const stats = [
   { label: "Doanh thu tháng",   value: "₫1.24 tỷ", change: "+8.1%",  up: true,  icon: TrendingUp,    bg: "bg-blue-50",    text: "text-blue-600"    },
 ];
 
-const orders = [
-  { id: "ORD-089", product: "Laptop Dell XPS 15",       qty: 12, warehouse: "Kho A", status: "completed", time: "08:32" },
-  { id: "ORD-088", product: "Màn hình LG 27\"",          qty: 5,  warehouse: "Kho B", status: "shipping",  time: "08:15" },
-  { id: "ORD-087", product: "Bàn phím cơ Keychron K8",  qty: 30, warehouse: "Kho A", status: "pending",   time: "07:58" },
-  { id: "ORD-086", product: "Chuột Logitech MX Master",  qty: 20, warehouse: "Kho C", status: "completed", time: "07:40" },
-  { id: "ORD-085", product: "SSD Samsung 1TB",           qty: 50, warehouse: "Kho B", status: "cancelled", time: "07:20" },
+const allOrders: DashboardOrder[] = [
+  { id: "ORD-089", product: "Laptop Dell XPS 15",         qty: 12, warehouse: "Kho A", status: "completed", time: "08:32" },
+  { id: "ORD-088", product: "Màn hình LG 27\"",            qty: 5,  warehouse: "Kho B", status: "shipping",  time: "08:15" },
+  { id: "ORD-087", product: "Bàn phím cơ Keychron K8",    qty: 30, warehouse: "Kho A", status: "pending",   time: "07:58" },
+  { id: "ORD-086", product: "Chuột Logitech MX Master",   qty: 20, warehouse: "Kho C", status: "completed", time: "07:40" },
+  { id: "ORD-085", product: "SSD Samsung 1TB",             qty: 50, warehouse: "Kho B", status: "cancelled", time: "07:20" },
+  { id: "ORD-084", product: "Hub USB-C Anker 7-in-1",     qty: 8,  warehouse: "Kho A", status: "completed", time: "06:55" },
+  { id: "ORD-083", product: "RAM Kingston 16GB DDR5",     qty: 40, warehouse: "Kho C", status: "shipping",  time: "06:30" },
+  { id: "ORD-082", product: "Tai nghe Sony WH-1000XM5",   qty: 3,  warehouse: "Kho B", status: "pending",   time: "06:10" },
+  { id: "ORD-081", product: "Webcam Logitech C920",        qty: 15, warehouse: "Kho A", status: "completed", time: "05:48" },
+  { id: "ORD-080", product: "Bộ sạc Anker 65W GaN",       qty: 25, warehouse: "Kho B", status: "completed", time: "05:20" },
+  { id: "ORD-079", product: "Card đồ họa RTX 4070",        qty: 2,  warehouse: "Kho C", status: "cancelled", time: "04:55" },
+  { id: "ORD-078", product: "Màn hình Dell UltraSharp",   qty: 7,  warehouse: "Kho A", status: "shipping",  time: "04:30" },
 ];
+
+const previewOrders = allOrders.slice(0, 5);
 
 const activities = [
   { text: "Xuất kho 12 Laptop Dell — Kho A",         time: "5 phút trước",  color: "bg-indigo-500"  },
@@ -33,7 +45,7 @@ const chartData = [65, 78, 52, 91, 73, 88, 95];
 const chartDays = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
 const maxVal    = Math.max(...chartData);
 
-const statusMap: Record<string, { label: string; icon: React.ElementType; cls: string }> = {
+const statusMap: Record<string, { label: string; icon: ElementType; cls: string }> = {
   completed: { label: "Hoàn thành", icon: CheckCircle2, cls: "text-emerald-700 bg-emerald-50" },
   shipping:  { label: "Đang giao",  icon: Loader2,      cls: "text-blue-600 bg-blue-50"       },
   pending:   { label: "Chờ xử lý", icon: Clock,        cls: "text-amber-600 bg-amber-50"     },
@@ -41,12 +53,12 @@ const statusMap: Record<string, { label: string; icon: React.ElementType; cls: s
 };
 
 export default function DashboardPage() {
-  const now     = new Date();
-  const hour    = now.getHours();
+  const now      = new Date();
+  const hour     = now.getHours();
   const greeting = hour < 12 ? "Chào buổi sáng" : hour < 18 ? "Chào buổi chiều" : "Chào buổi tối";
 
   return (
-    <div className="space-y-6 max-w-[1400px]">
+    <div className="space-y-6">
 
       {/* Greeting */}
       <div>
@@ -141,9 +153,7 @@ export default function DashboardPage() {
       <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
           <h3 className="text-sm font-semibold text-slate-900">Đơn hàng gần đây</h3>
-          <button className="text-xs text-indigo-600 font-medium hover:text-indigo-700 transition-colors">
-            Xem tất cả →
-          </button>
+          <AllOrdersButton orders={allOrders} />
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -155,11 +165,11 @@ export default function DashboardPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
-              {orders.map((o) => {
+              {previewOrders.map((o) => {
                 const s = statusMap[o.status];
                 const StatusIcon = s.icon;
                 return (
-                  <tr key={o.id} className="hover:bg-slate-50/70 transition-colors cursor-pointer">
+                  <tr key={o.id} className="hover:bg-slate-50/70 transition-colors">
                     <td className="px-5 py-3.5 font-mono text-xs font-medium text-slate-600">{o.id}</td>
                     <td className="px-5 py-3.5 text-slate-800 font-medium whitespace-nowrap">{o.product}</td>
                     <td className="px-5 py-3.5 text-slate-600">{o.qty}</td>
