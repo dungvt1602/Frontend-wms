@@ -500,6 +500,112 @@ Tương thích với **Spring AI** (`ChatClient`) và **FastAPI + LangChain RAG*
 
 ---
 
+### Navigation Progress Bar (`components/layout/NavigationProgress.tsx`)
+
+Thanh progress bar mỏng màu indigo nằm trên cùng màn hình — xuất hiện mỗi khi người dùng **chuyển trang** trong dashboard, tạo cảm giác "có gì đó đang tải" thay vì content đổi đột ngột. Hoạt động tương tự NProgress (YouTube, GitHub).
+
+```
+src/components/layout/
+└── NavigationProgress.tsx     ← Client component, ~60 dòng
+```
+
+Được mount 1 lần duy nhất trong `(dashboard)/layout.tsx`:
+
+```tsx
+<div className="flex h-screen ...">
+  <NavigationProgress />       ← lắng nghe pathname thay đổi
+  <Sidebar />
+  <main>{children}</main>
+</div>
+```
+
+---
+
+**Cấu trúc bên trong component:**
+
+```
+NavigationProgress()
+│
+├── State
+│   ├── visible  : boolean     ← có hiển thị thanh không
+│   └── width    : number      ← % chiều rộng hiện tại (0 → 100)
+│
+├── Refs (không trigger re-render)
+│   ├── timerRef   : setTimeout ID        ← dùng để clear timer cũ
+│   ├── rafRef     : requestAnimationFrame ID
+│   └── prevPath   : pathname trước đó    ← so sánh để phát hiện thay đổi
+│
+├── clear()                    ← hàm dọn dẹp: huỷ mọi timer + raf đang chờ
+│
+├── useEffect([pathname])      ← chạy mỗi khi pathname đổi
+│   │
+│   └── Timeline animation:
+│       │
+│       ├── T=0ms     setVisible(true), setWidth(0)
+│       ├── T=1 frame setWidth(70)     ← nhảy nhanh lên 70%
+│       ├── T=400ms   setWidth(85)     ← chậm lại ở 85% (giả lập đang tải)
+│       ├── T=500ms   setWidth(100)    ← hoàn tất, chạy tới mép phải
+│       └── T=800ms   setVisible(false), setWidth(0)  ← ẩn, reset
+│
+└── Render
+    └── <div fixed top-0 left-0 z-[99999] h-[2.5px]>
+        style: width = {width}%
+        background: gradient indigo
+        transition: width 0.4s ease (hoặc 0.15s khi width=100)
+        boxShadow: glow indigo
+```
+
+---
+
+**Luồng hoạt động khi user click menu:**
+
+```
+1. User click "Sản phẩm" trong Sidebar
+        │
+        ▼
+2. router.push("/products")  →  Next.js bắt đầu load route mới
+        │
+        ▼
+3. usePathname() phát hiện thay đổi
+        │
+        ▼
+4. useEffect kích hoạt:
+   │
+   ├── Xoá timer cũ (nếu user chuyển trang liên tục)
+   ├── Hiển thị thanh (visible = true)
+   ├── Animate width: 0 → 70% → 85% → 100%
+   └── Sau 800ms tổng → ẩn thanh
+        │
+        ▼
+5. User thấy thanh chạy từ trái sang phải rồi biến mất → trang mới đã render
+```
+
+---
+
+**Tại sao dùng `useRef` thay vì `useState` cho timer?**
+
+| Vấn đề | Nếu dùng useState | Dùng useRef |
+|---|---|---|
+| Lưu ID timer | ✗ Thay đổi state → re-render thừa | ✓ Không trigger re-render |
+| `clear()` gọi trong effect | Stale closure, dễ sai | Luôn đọc giá trị mới nhất |
+
+**Tại sao cần `prevPath`?**  
+React 18 có thể chạy `useEffect` **2 lần** trong strict mode. Check `pathname === prevPath.current` để tránh animation chạy lặp khi pathname không thực sự đổi.
+
+**Tại sao `requestAnimationFrame` trước khi `setWidth(70)`?**  
+Nếu set `width=0` rồi ngay lập tức `width=70` trong cùng 1 tick, React sẽ gộp lại thành 1 update duy nhất → mất animation. `rAF` đẩy lệnh set 70 sang frame tiếp theo → trình duyệt kịp paint frame 0% rồi mới animate tới 70%.
+
+---
+
+**Đặc điểm quan trọng:**
+
+- **Zero config** — chỉ cần mount 1 lần trong layout, tự động hoạt động cho mọi chuyển trang
+- **Không reload sidebar/header** — Next.js App Router giữ nguyên layout, chỉ swap `children`
+- **Không cần cài package** — viết thuần React + `usePathname` từ Next.js
+- **Cleanup đúng cách** — `return clear` trong useEffect đảm bảo không leak timer khi user chuyển trang liên tục
+
+---
+
 ## Nguyên tắc kiến trúc
 
 1. **Server State** → TanStack Query (cache, refetch tự động)

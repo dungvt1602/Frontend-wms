@@ -4,7 +4,7 @@ import { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import {
   Warehouse, LayoutDashboard, Package, ShoppingBag, ClipboardList,
-  Building2, Users, BarChart3, Settings,
+  Building2, Users, UserRound, BarChart3, Settings,
   ChevronLeft, ChevronRight, LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -16,6 +16,7 @@ const navItems = [
   { icon: ClipboardList,   label: "Đơn hàng",       href: "/orders"     },
   { icon: Building2,       label: "Kho bãi",        href: "/warehouse"  },
   { icon: Users,           label: "Nhà cung cấp",   href: "/suppliers"  },
+  { icon: UserRound,       label: "Khách hàng",     href: "/customers"  },
   { icon: BarChart3,       label: "Báo cáo",        href: "/reports"    },
   { icon: Settings,        label: "Cài đặt",        href: "/settings"   },
 ];
