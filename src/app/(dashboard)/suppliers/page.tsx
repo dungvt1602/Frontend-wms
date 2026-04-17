@@ -2,9 +2,12 @@
 
 import { useState } from "react";
 import { Plus, Download } from "lucide-react";
-import SupplierStats   from "@/features/suppliers/components/SupplierStats";
-import SupplierFilters from "@/features/suppliers/components/SupplierFilters";
-import SupplierTable   from "@/features/suppliers/components/SupplierTable";
+import SupplierStats        from "@/features/suppliers/components/SupplierStats";
+import SupplierFilters      from "@/features/suppliers/components/SupplierFilters";
+import SupplierTable        from "@/features/suppliers/components/SupplierTable";
+import AddSupplierModal     from "@/features/suppliers/components/AddSupplierModal";
+import SupplierDetailModal  from "@/features/suppliers/components/SupplierDetailModal";
+import EditSupplierModal    from "@/features/suppliers/components/EditSupplierModal";
 import type { Supplier } from "@/features/suppliers/types";
 
 /* ══════════════ Mock data ══════════════ */
@@ -73,14 +76,23 @@ const suppliers: Supplier[] = [
 
 /* ══════════════ Page ══════════════ */
 export default function SuppliersPage() {
-  const [search,   setSearch]   = useState("");
-  const [category, setCategory] = useState("Tất cả");
-  const [statusF,  setStatusF]  = useState("all");
-  const [page,     setPage]     = useState(1);
+  const [search,    setSearch]    = useState("");
+  const [category,  setCategory]  = useState("Tất cả");
+  const [statusF,   setStatusF]   = useState("all");
+  const [page,      setPage]      = useState(1);
+  const [showAdd,   setShowAdd]   = useState(false);
+  const [allSuppliers, setAllSuppliers] = useState<Supplier[]>(suppliers);
+  const [viewingSupplier, setViewingSupplier] = useState<Supplier | null>(null);
+  const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
+
+  const handleCreated = (s: Supplier) => setAllSuppliers((prev) => [s, ...prev]);
+
+  const handleSaved = (updated: Supplier) =>
+    setAllSuppliers((prev) => prev.map((s) => (s.id === updated.id ? updated : s)));
 
   const resetPage = (fn: (v: string) => void) => (v: string) => { fn(v); setPage(1); };
 
-  const filtered = suppliers.filter((s) =>
+  const filtered = allSuppliers.filter((s) =>
     (s.name.toLowerCase().includes(search.toLowerCase()) ||
      s.id.toLowerCase().includes(search.toLowerCase()) ||
      s.contact.toLowerCase().includes(search.toLowerCase())) &&
@@ -102,6 +114,7 @@ export default function SuppliersPage() {
             <Download size={15} /> Xuất Excel
           </button>
           <button
+            onClick={() => setShowAdd(true)}
             className="flex items-center gap-2 h-9 px-3.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90"
             style={{ background: "linear-gradient(135deg,#6366f1,#4f46e5)", boxShadow: "0 2px 8px rgba(99,102,241,0.3)" }}
           >
@@ -110,7 +123,7 @@ export default function SuppliersPage() {
         </div>
       </div>
 
-      <SupplierStats suppliers={suppliers} />
+      <SupplierStats suppliers={allSuppliers} />
 
       <SupplierFilters
         search={search}
@@ -126,7 +139,38 @@ export default function SuppliersPage() {
         total={filtered.length}
         page={page}
         onPage={setPage}
+        onView={setViewingSupplier}
+        onEdit={setEditingSupplier}
       />
+
+      {showAdd && (
+        <AddSupplierModal
+          onClose={() => setShowAdd(false)}
+          onCreated={handleCreated}
+        />
+      )}
+
+      {viewingSupplier && (
+        <SupplierDetailModal
+          supplier={viewingSupplier}
+          onClose={() => setViewingSupplier(null)}
+          onEdit={() => {
+            setEditingSupplier(viewingSupplier);
+            setViewingSupplier(null);
+          }}
+        />
+      )}
+
+      {editingSupplier && (
+        <EditSupplierModal
+          supplier={editingSupplier}
+          onClose={() => setEditingSupplier(null)}
+          onSaved={(updated) => {
+            handleSaved(updated);
+            setEditingSupplier(null);
+          }}
+        />
+      )}
 
     </div>
   );

@@ -1,7 +1,8 @@
 import {
   ArrowUpDown, PackageOpen, CheckCircle2,
-  AlertTriangle, XCircle, ArrowLeftRight,
+  AlertTriangle, XCircle, Eye,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import Pagination from "@/components/common/Pagination";
 import { cn } from "@/lib/utils";
 import { getStatus } from "../types";
@@ -25,6 +26,7 @@ interface Props {
 }
 
 export default function InventoryTable({ items, total, page, sortDir, onSort, onPage }: Props) {
+  const router     = useRouter();
   const totalPages = Math.ceil(total / PAGE_SIZE);
   const paginated  = items.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
@@ -67,7 +69,7 @@ export default function InventoryTable({ items, total, page, sortDir, onSort, on
               const Icon = s.icon;
               const pct  = Math.min(100, Math.round((p.current / (p.min * 2)) * 100));
               return (
-                <tr key={p.id} className="hover:bg-slate-50/60 transition-colors group">
+                <tr key={p.id} className="hover:bg-slate-50/60 transition-colors group cursor-pointer" onClick={() => router.push(`/inventory/${p.id}`)}>
                   <td className="px-5 py-3.5 font-mono text-xs font-semibold text-indigo-600">{p.id}</td>
                   <td className="px-5 py-3.5 font-medium text-slate-800 whitespace-nowrap">{p.name}</td>
                   <td className="px-5 py-3.5 text-xs text-slate-500 whitespace-nowrap">{p.warehouse}</td>
@@ -95,9 +97,12 @@ export default function InventoryTable({ items, total, page, sortDir, onSort, on
                       {s.label}
                     </span>
                   </td>
-                  <td className="px-5 py-3.5">
-                    <button className="opacity-0 group-hover:opacity-100 w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-indigo-600 transition-all">
-                      <ArrowLeftRight size={13} />
+                  <td className="px-5 py-3.5" onClick={(e) => e.stopPropagation()}>
+                    <button
+                      onClick={() => router.push(`/inventory/${p.id}`)}
+                      className="opacity-0 group-hover:opacity-100 w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:bg-indigo-50 hover:text-indigo-600 transition-all"
+                    >
+                      <Eye size={13} />
                     </button>
                   </td>
                 </tr>

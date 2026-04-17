@@ -42,9 +42,11 @@ interface Props {
   total: number;
   page: number;
   onPage: (p: number) => void;
+  onView?: (s: Supplier) => void;
+  onEdit?: (s: Supplier) => void;
 }
 
-export default function SupplierTable({ items, total, page, onPage }: Props) {
+export default function SupplierTable({ items, total, page, onPage, onView, onEdit }: Props) {
   const [openMenu, setOpenMenu] = useState<string | null>(null);
 
   const totalPages = Math.ceil(total / PAGE_SIZE);
@@ -169,10 +171,16 @@ export default function SupplierTable({ items, total, page, onPage }: Props) {
                     <>
                       <div className="fixed inset-0 z-10" onClick={() => setOpenMenu(null)} />
                       <div className="absolute right-8 top-2 w-44 bg-white rounded-xl shadow-lg border border-slate-200 z-20 py-1 overflow-hidden">
-                        <button className="w-full flex items-center gap-2 px-3 py-2 text-xs text-slate-600 hover:bg-slate-50 transition-colors">
+                        <button
+                          className="w-full flex items-center gap-2 px-3 py-2 text-xs text-slate-600 hover:bg-slate-50 transition-colors"
+                          onClick={() => { setOpenMenu(null); onView?.(s); }}
+                        >
                           <Eye size={13} /> Xem chi tiết
                         </button>
-                        <button className="w-full flex items-center gap-2 px-3 py-2 text-xs text-slate-600 hover:bg-slate-50 transition-colors">
+                        <button
+                          className="w-full flex items-center gap-2 px-3 py-2 text-xs text-slate-600 hover:bg-slate-50 transition-colors"
+                          onClick={() => { setOpenMenu(null); onEdit?.(s); }}
+                        >
                           <Pencil size={13} /> Chỉnh sửa
                         </button>
                         <button className="w-full flex items-center gap-2 px-3 py-2 text-xs text-red-500 hover:bg-red-50 transition-colors">

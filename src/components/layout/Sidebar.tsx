@@ -78,6 +78,7 @@ export default function Sidebar() {
       {/* User + Logout */}
       <div className="border-t border-slate-800 p-2 space-y-0.5">
         <button
+          onClick={() => router.push("/logout")}
           className={cn(
             "w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-slate-400 hover:bg-slate-800 hover:text-red-400 transition-all",
             collapsed && "justify-center px-0"

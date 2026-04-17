@@ -190,7 +190,8 @@ wms-frontend/
 │   │   ├── layout/                 # Components bố cục chính
 │   │   │   ├── Sidebar.tsx         # Menu điều hướng trái, có thu gọn
 │   │   │   └── Header.tsx          # Thanh trên: search, notification, user
-│   │   └── common/                 # Components tái sử dụng chung (LoadingSpinner, EmptyState...)
+│   │   ├── common/                 # Components tái sử dụng chung (LoadingSpinner, EmptyState...)
+│   │   └── chatbot/                # Chatbot widget — xem chi tiết section "Chatbot"
 │   │
 │   ├── features/                   # Logic theo từng domain nghiệp vụ
 │   │   ├── auth/                   # Xác thực người dùng
@@ -440,6 +441,62 @@ src/
 | `active` | Đang hoạt động bình thường |
 | `maintenance` | Đang bảo trì, hạn chế nhập/xuất |
 | `inactive` | Tạm ngừng hoạt động |
+
+---
+
+### Chatbot Widget (`components/chatbot/`)
+
+Widget chat AI nổi ở góc phải dưới màn hình, dùng chung cho toàn bộ dashboard.
+
+```
+src/components/chatbot/
+│
+├── index.tsx                 ← Entry point — portal wrapper + ghép ChatWindow + FABButton
+├── ChatWindow.tsx            ← Cửa sổ chat: Header + MessageList + SuggestedPrompts + ChatInput
+├── MessageList.tsx           ← Render danh sách MessageBubble + TypingIndicator
+├── MessageBubble.tsx         ← 1 bubble (avatar + nội dung, hỗ trợ **bold**)
+├── TypingIndicator.tsx       ← 3 chấm bounce khi bot đang "nghĩ"
+├── SuggestedPrompts.tsx      ← Pill buttons gợi ý, ẩn sau khi user nhắn tin đầu tiên
+├── ChatInput.tsx             ← Textarea + nút Send, Enter gửi / Shift+Enter xuống dòng
+├── FABButton.tsx             ← Nút tròn góc phải + dot online + badge unread
+│
+├── hooks/
+│   └── useChat.ts            ← Toàn bộ logic: state, effects, send(), reset(), handleKey()
+│
+├── lib/
+│   └── api.ts                ← fetchReply() — gọi backend hoặc trả mock khi chưa có API
+│
+└── types.ts                  ← interface Message { id, role, content, createdAt }
+```
+
+**Luồng dữ liệu:**
+```
+index.tsx (portal)
+  └── useChat()              ← quản lý toàn bộ state
+        ├── fetchReply()     ← gọi POST /chat → nhận { content }
+        └── state: messages, input, loading, unread, open
+  ├── ChatWindow             ← nhận props từ useChat, không có state riêng
+  │   ├── MessageList → MessageBubble × N
+  │   ├── TypingIndicator    ← hiện khi loading = true
+  │   ├── SuggestedPrompts   ← hiện khi chưa có tin user
+  │   └── ChatInput          ← gọi onSend() / onKeyDown()
+  └── FABButton              ← toggle open, hiện badge unread
+```
+
+**Kết nối backend:**
+```env
+# .env.local
+NEXT_PUBLIC_CHATBOT_API_URL=http://localhost:8080/api
+```
+
+```
+POST {API_URL}/chat
+Body:     { messages: [{ role: "user"|"assistant", content: string }] }
+Response: { content: string }
+```
+Tương thích với **Spring AI** (`ChatClient`) và **FastAPI + LangChain RAG**.
+
+**Lưu ý hydration:** `index.tsx` dùng `mounted` state + `useEffect` để đảm bảo `createPortal(document.body)` chỉ chạy trên client, tránh lỗi SSR mismatch.
 
 ---
 

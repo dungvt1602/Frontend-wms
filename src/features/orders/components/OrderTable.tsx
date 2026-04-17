@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, Fragment } from "react";
+import { useRouter } from "next/navigation";
 import {
   ChevronDown, ChevronUp,
   MoreHorizontal, Eye, Pencil, XCircle, Package,
@@ -23,9 +24,11 @@ interface Props {
   total: number;
   page: number;
   onPage: (p: number) => void;
+  onEdit?: (order: Order) => void;
 }
 
-export default function OrderTable({ items, total, page, onPage }: Props) {
+export default function OrderTable({ items, total, page, onPage, onEdit }: Props) {
+  const router = useRouter();
   const [openMenu,   setOpenMenu]   = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
@@ -148,10 +151,16 @@ export default function OrderTable({ items, total, page, onPage }: Props) {
                         <>
                           <div className="fixed inset-0 z-10" onClick={() => setOpenMenu(null)} />
                           <div className="absolute right-8 top-2 w-44 bg-white rounded-xl shadow-lg border border-slate-200 z-20 py-1 overflow-hidden">
-                            <button className="w-full flex items-center gap-2 px-3 py-2 text-xs text-slate-600 hover:bg-slate-50 transition-colors">
+                            <button
+                              onClick={() => { setOpenMenu(null); router.push(`/orders/${o.id}`); }}
+                              className="w-full flex items-center gap-2 px-3 py-2 text-xs text-slate-600 hover:bg-slate-50 transition-colors"
+                            >
                               <Eye size={13} /> Xem chi tiết
                             </button>
-                            <button className="w-full flex items-center gap-2 px-3 py-2 text-xs text-slate-600 hover:bg-slate-50 transition-colors">
+                            <button
+                              onClick={() => { setOpenMenu(null); onEdit?.(o); }}
+                              className="w-full flex items-center gap-2 px-3 py-2 text-xs text-slate-600 hover:bg-slate-50 transition-colors"
+                            >
                               <Pencil size={13} /> Chỉnh sửa
                             </button>
                             <button className="w-full flex items-center gap-2 px-3 py-2 text-xs text-red-500 hover:bg-red-50 transition-colors">
