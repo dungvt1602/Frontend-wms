@@ -614,4 +614,91 @@ Nếu set `width=0` rồi ngay lập tức `width=70` trong cùng 1 tick, React 
 4. **Không** nhét dữ liệu API vào Zustand
 5. **Feature-first**: mỗi domain tự chứa đủ components, hooks, api, types của nó
 6. **Import alias**: dùng `@/` thay vì đường dẫn tương đối `../../`
-7. **Component không gọi API trực tiếp** — luôn đi qua hook → api function → api-client
+7. **Component không gọi API trực tiếp** — luôn đi qua hook → api function → api-client  
+
+
+
+
+# Luồng xử lý hệ thống kiểm kê
+ 
+---
+ 
+## 1. `useConfirm` Hook — Cơ chế Promise
+ 
+```
+Component gọi confirm()
+        ↓
+Hook tạo Promise + lưu resolve() vào state
+        ↓
+Modal render ra (open=true)
+        ↓
+User bấm "Đồng ý"  →  resolve(true)   →  modal đóng  →  Promise trả về true
+User bấm "Từ chối" →  resolve(false)  →  modal đóng  →  Promise trả về false
+```
+ 
+---
+ 
+## 2. Luồng cụ thể — Scanner cầm tay
+ 
+```
+Quét barcode → nhấn Enter
+        ↓
+Tìm SKU trong danh sách
+        ↓
+[Không tìm thấy] → Flash đỏ "Không tìm thấy SKU" 2 giây
+        ↓
+[Tìm thấy] → Luồng A hay B?
+        ↓
+┌──────────────────────┬──────────────────────────────┐
+│    Luồng A           │    Luồng B                   │
+│ Hiện card điền qty   │ Tự động +1                   │
+│ Bấm "Xác nhận"       │ Flash xanh tên + số lượng    │
+│        ↓             │ Xong, quét tiếp               │
+│ Popup xác nhận       │                              │
+│ [Đồng ý / Từ chối]   │                              │
+│        ↓             │                              │
+│ Lưu vào bảng         │                              │
+└──────────────────────┴──────────────────────────────┘
+```
+ 
+---
+ 
+## 3. Luồng — Trang kiểm kê chi tiết
+ 
+```
+Nhập số lượng (manual / scanner / camera)
+        ↓
+Bấm "Lưu tiến độ"
+        ↓
+Popup: "Lưu tiến độ?" + chi tiết đã nhập X/Y
+        ↓
+[Đồng ý] → Lưu, phiên vẫn "Đang kiểm"
+[Từ chối] → Không làm gì
+        ↓ (sau khi nhập đủ)
+Bấm "Hoàn thành & Gửi duyệt"
+        ↓
+Popup WARNING: tóm tắt thiếu/thừa
+        ↓
+[Đồng ý] → Status → "Chờ duyệt"
+        ↓ (manager)
+Bấm "Duyệt & Cập nhật tồn"
+        ↓
+Popup SUCCESS: số khớp/thiếu/thừa
+        ↓
+[Đồng ý] → Status → "Hoàn tất", tồn kho cập nhật
+```
+ 
+---
+ 
+## 4. Luồng — Điều chỉnh tồn kho / Thêm khách hàng
+ 
+```
+Điền form → bấm Submit
+        ↓
+Validation (nếu lỗi → báo lỗi, dừng)
+        ↓
+Popup xác nhận tóm tắt thông tin
+        ↓
+[Đồng ý] → setSaving → gọi API (mock) → thành công
+[Từ chối] → quay lại form, giữ nguyên dữ liệu đã nhập
+```

@@ -5,20 +5,41 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   Warehouse, LayoutDashboard, Package, ShoppingBag, ClipboardList,
   Building2, Users, UserRound, BarChart3, Settings,
-  ChevronLeft, ChevronRight, LogOut,
+  ChevronLeft, ChevronRight, LogOut, ClipboardCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const navItems = [
-  { icon: LayoutDashboard, label: "Tổng quan",      href: "/dashboard"  },
-  { icon: Package,         label: "Tồn kho",        href: "/inventory"  },
-  { icon: ShoppingBag,     label: "Sản phẩm",       href: "/products"   },
-  { icon: ClipboardList,   label: "Đơn hàng",       href: "/orders"     },
-  { icon: Building2,       label: "Kho bãi",        href: "/warehouse"  },
-  { icon: Users,           label: "Nhà cung cấp",   href: "/suppliers"  },
-  { icon: UserRound,       label: "Khách hàng",     href: "/customers"  },
-  { icon: BarChart3,       label: "Báo cáo",        href: "/reports"    },
-  { icon: Settings,        label: "Cài đặt",        href: "/settings"   },
+const navGroups = [
+  {
+    label: "Tổng quan",
+    items: [
+      { icon: LayoutDashboard, label: "Tổng quan", href: "/dashboard" },
+    ],
+  },
+  {
+    label: "Vận hành",
+    items: [
+      { icon: Package,         label: "Tồn kho",   href: "/inventory" },
+      { icon: ShoppingBag,     label: "Sản phẩm",  href: "/products"  },
+      { icon: ClipboardList,   label: "Đơn hàng",  href: "/orders"    },
+      { icon: ClipboardCheck,  label: "Kiểm kê",   href: "/stocktake" },
+    ],
+  },
+  {
+    label: "Đối tác",
+    items: [
+      { icon: Building2,  label: "Kho bãi",      href: "/warehouse" },
+      { icon: Users,      label: "Nhà cung cấp", href: "/suppliers" },
+      { icon: UserRound,  label: "Khách hàng",   href: "/customers" },
+    ],
+  },
+  {
+    label: "Hệ thống",
+    items: [
+      { icon: BarChart3, label: "Báo cáo", href: "/reports"  },
+      { icon: Settings,  label: "Cài đặt", href: "/settings" },
+    ],
+  },
 ];
 
 export default function Sidebar() {
@@ -50,30 +71,58 @@ export default function Sidebar() {
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 py-4 space-y-0.5 overflow-y-auto overflow-x-hidden px-2">
-        {navItems.map(({ icon: Icon, label, href }) => {
-          const active = pathname === href;
-          return (
-            <button
-              key={href}
-              onClick={() => router.push(href)}
-              title={collapsed ? label : undefined}
-              className={cn(
-                "w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150",
-                active
-                  ? "bg-indigo-600 text-white shadow-lg shadow-indigo-900/40"
-                  : "text-slate-400 hover:bg-slate-800 hover:text-white",
-                collapsed && "justify-center px-0"
-              )}
-            >
-              <Icon className="h-4.5 w-4.5 flex-shrink-0" size={18} />
-              {!collapsed && <span>{label}</span>}
-              {active && !collapsed && (
-                <span className="ml-auto w-1.5 h-1.5 rounded-full bg-white/70" />
-              )}
-            </button>
-          );
-        })}
+      <nav className="flex-1 py-3 overflow-y-auto overflow-x-hidden px-2 space-y-0">
+        {navGroups.map((group, gi) => (
+          <div key={group.label}>
+            {/* Divider between groups */}
+            {gi > 0 && (
+              <div className={cn(
+                "my-2",
+                collapsed ? "mx-2" : "mx-1"
+              )}>
+                <div className="h-px bg-slate-800" />
+                {!collapsed && (
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-600 px-2 pt-2 pb-0.5">
+                    {group.label}
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* First group label when expanded */}
+            {gi === 0 && !collapsed && (
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-600 px-2 pb-0.5">
+                {group.label}
+              </p>
+            )}
+
+            <div className="space-y-0.5">
+              {group.items.map(({ icon: Icon, label, href }) => {
+                const active = pathname === href;
+                return (
+                  <button
+                    key={href}
+                    onClick={() => router.push(href)}
+                    title={collapsed ? label : undefined}
+                    className={cn(
+                      "w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150",
+                      active
+                        ? "bg-indigo-600 text-white shadow-lg shadow-indigo-900/40"
+                        : "text-slate-400 hover:bg-slate-800 hover:text-white",
+                      collapsed && "justify-center px-0"
+                    )}
+                  >
+                    <Icon className="flex-shrink-0" size={18} />
+                    {!collapsed && <span>{label}</span>}
+                    {active && !collapsed && (
+                      <span className="ml-auto w-1.5 h-1.5 rounded-full bg-white/70" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </nav>
 
       {/* User + Logout */}

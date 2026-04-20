@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { X, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Customer } from "../types";
+import { useConfirm } from "@/hooks/useConfirm";
 
 const TYPES: { value: Customer["type"]; label: string }[] = [
   { value: "retail",     label: "Lẻ"           },
@@ -18,6 +19,7 @@ interface Props {
 }
 
 export default function AddCustomerModal({ onClose, onCreated }: Props) {
+  const { confirm, modal } = useConfirm();
   const [name,    setName]    = useState("");
   const [contact, setContact] = useState("");
   const [phone,   setPhone]   = useState("");
@@ -42,6 +44,19 @@ export default function AddCustomerModal({ onClose, onCreated }: Props) {
 
   const handleSave = async () => {
     if (!validate()) return;
+    const ok = await confirm({
+      title: "Thêm khách hàng mới?",
+      variant: "primary",
+      confirmLabel: "Thêm",
+      cancelLabel: "Huỷ",
+      details: [
+        { label: "Tên",       value: name.trim(),    highlight: true },
+        { label: "SĐT",       value: phone.trim() },
+        { label: "Loại",      value: TYPES.find(t => t.value === type)?.label ?? type },
+        { label: "Trạng thái", value: status === "active" ? "Hoạt động" : "Tạm ngừng" },
+      ],
+    });
+    if (!ok) return;
     setSaving(true);
     await new Promise((r) => setTimeout(r, 800));
     setSaving(false);
@@ -262,6 +277,7 @@ export default function AddCustomerModal({ onClose, onCreated }: Props) {
           </button>
         </div>
       </div>
+      {modal}
       <style>{`@keyframes modalIn{from{opacity:0;transform:scale(.96) translateY(6px)}to{opacity:1;transform:scale(1) translateY(0)}}`}</style>
     </div>,
     document.body

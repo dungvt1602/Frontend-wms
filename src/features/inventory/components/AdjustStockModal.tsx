@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { X, Plus, Minus, Check, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { StockItem, InventoryLog } from "../types";
+import { useConfirm } from "@/hooks/useConfirm";
 
 const REASONS_INCREASE = ["Kiểm kê phát hiện thừa", "Hàng trả về", "Điều chỉnh hệ thống", "Khác"];
 const REASONS_DECREASE = ["Kiểm kê phát hiện thiếu", "Hàng hỏng / hết hạn", "Mất mát", "Điều chỉnh hệ thống", "Khác"];
@@ -16,6 +17,7 @@ interface Props {
 }
 
 export default function AdjustStockModal({ items, onClose, onLog }: Props) {
+  const { confirm, modal } = useConfirm();
   const [selectedId, setSelectedId] = useState(items[0]?.id ?? "");
   const [type,       setType]       = useState<"increase" | "decrease">("increase");
   const [qty,        setQty]        = useState("");
@@ -41,6 +43,20 @@ export default function AdjustStockModal({ items, onClose, onLog }: Props) {
 
   const handleSave = async () => {
     if (!validate()) return;
+    const ok = await confirm({
+      title: "Xác nhận điều chỉnh tồn kho?",
+      description: "Thao tác này sẽ thay đổi số lượng tồn kho trong hệ thống.",
+      variant: type === "decrease" ? "warning" : "primary",
+      confirmLabel: "Xác nhận",
+      cancelLabel: "Huỷ",
+      details: [
+        { label: "Sản phẩm",        value: selected?.name ?? "" },
+        { label: "Loại điều chỉnh", value: type === "increase" ? "Tăng tồn kho" : "Giảm tồn kho", highlight: true },
+        { label: "Số lượng",        value: `${qty} ${selected?.unit ?? ""}`, highlight: true },
+        { label: "Lý do",           value: reason },
+      ],
+    });
+    if (!ok) return;
     setSaving(true);
     await new Promise((r) => setTimeout(r, 800));
     setSaving(false);
@@ -209,6 +225,7 @@ export default function AdjustStockModal({ items, onClose, onLog }: Props) {
         </div>
       </div>
 
+      {modal}
       <style>{`@keyframes modalIn{from{opacity:0;transform:scale(.96) translateY(6px)}to{opacity:1;transform:scale(1) translateY(0)}}`}</style>
     </div>,
     document.body
