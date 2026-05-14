@@ -11,15 +11,21 @@ interface LoginMutationParams extends LoginPayload {
 export function useLogin() {
   return useMutation<LoginResponseData, Error, LoginMutationParams>({
     mutationFn: async ({ email, password }) => {
-      const response = await authApi.login({ email, password });
-      
-      // Nếu Backend trả về code không phải 200, coi đó là lỗi
-      const result = response.data;
-      if (result.code && result.code !== 200) {
-        throw new Error(result.message || "Đăng nhập thất bại");
+      try {
+        const response = await authApi.login({ email, password });
+        
+        // Nếu Backend trả về code không phải 200, coi đó là lỗi
+        const result = response.data;
+        if (result.code && result.code !== 200) {
+          throw new Error(result.message || "Đăng nhập thất bại");
+        }
+        
+        return result.data || (result as LoginResponseData);
+      } catch (error: unknown) {
+        // Chuyển đổi tin nhắn lỗi sang tiếng Việt cho thân thiện
+        let message = error instanceof Error ? error.message : "Đăng nhập thất bại";
+        throw new Error(message);
       }
-      
-      return result.data || (result as any);
     },
     onSuccess: (data, variables) => {
       if (data?.tokens) {

@@ -62,9 +62,12 @@ export default function LoginForm() {
     try {
       await loginMutation.mutateAsync({ email, password, remember });
       router.push("/");
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Chuyển đổi tin nhắn lỗi sang tiếng Việt cho thân thiện
-      let message = error.message;
+      let message = "";
+      if (error instanceof Error) {
+        message = error.message;
+      }
       if (message === "Bad credentials") {
         message = "Email hoặc mật khẩu không chính xác.";
       }
