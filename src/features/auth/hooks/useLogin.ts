@@ -20,7 +20,7 @@ export function useLogin() {
           throw new Error(result.message || "Đăng nhập thất bại");
         }
         
-        return result.data || (result as LoginResponseData);
+        return (result.data || result) as unknown as LoginResponseData;
       } catch (error: unknown) {
         // Chuyển đổi tin nhắn lỗi sang tiếng Việt cho thân thiện
         let message = error instanceof Error ? error.message : "Đăng nhập thất bại";

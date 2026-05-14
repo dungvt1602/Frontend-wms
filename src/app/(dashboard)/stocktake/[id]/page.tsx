@@ -105,7 +105,7 @@ export default function StocktakeDetailPage({ params }: { params: Promise<{ id: 
   // ── Handlers ───────────────────────────────────────────────────────────────
 
   function startEditing() {
-    if (session.status === "draft")
+    if (session?.status === "draft")
       setSession((p) => p ? { ...p, status: "counting" } : p);
     setIsEditing(true);
   }
@@ -125,7 +125,7 @@ export default function StocktakeDetailPage({ params }: { params: Promise<{ id: 
 
   // Called by ScannerMode & CameraMode when a barcode is confirmed
   function handleItemScanned(productId: string, qty: number, note: string) {
-    if (session.status === "draft")
+    if (session?.status === "draft")
       setSession((p) => p ? { ...p, status: "counting" } : p);
     setLocalItems((prev) =>
       prev.map((i) => i.productId === productId ? { ...i, actualQty: qty, note } : i)
@@ -196,14 +196,14 @@ export default function StocktakeDetailPage({ params }: { params: Promise<{ id: 
         <div className="flex flex-wrap items-center gap-3">
           <div>
             <div className="flex items-center gap-2.5">
-              <h1 className="text-2xl font-bold text-slate-800">{session.code}</h1>
-              <StatusBadge status={session.status} />
+              <h1 className="text-2xl font-bold text-slate-800">{session?.code}</h1>
+              <StatusBadge status={session?.status ?? "draft"} />
             </div>
-            <p className="text-sm text-slate-500 mt-0.5">{session.warehouseName}</p>
+            <p className="text-sm text-slate-500 mt-0.5">{session?.warehouseName}</p>
           </div>
 
           <div className="ml-auto flex items-center gap-2">
-            {session.status === "pending_approval" && (
+            {session?.status === "pending_approval" && (
               <button onClick={handleApprove}
                       className="flex items-center gap-2 px-4 py-2 rounded-xl bg-green-600 text-white text-sm font-semibold shadow-sm hover:bg-green-700 transition-colors">
                 <CheckCircle size={16} /> Duyệt & Cập nhật tồn
@@ -214,9 +214,9 @@ export default function StocktakeDetailPage({ params }: { params: Promise<{ id: 
 
         {/* Info row */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          <InfoCard icon={Building2} label="Kho"        value={session.warehouseName} />
-          <InfoCard icon={User}      label="Phụ trách"  value={session.assignedTo}    />
-          <InfoCard icon={Calendar}  label="Ngày kiểm"  value={session.scheduledDate} />
+          <InfoCard icon={Building2} label="Kho"        value={session?.warehouseName ?? ""} />
+          <InfoCard icon={User}      label="Phụ trách"  value={session?.assignedTo ?? ""}    />
+          <InfoCard icon={Calendar}  label="Ngày kiểm"  value={session?.scheduledDate ?? ""} />
           <InfoCard icon={FileText}  label="Tiến độ"    value={`${counted} / ${total} mặt hàng`} />
         </div>
 
@@ -239,7 +239,7 @@ export default function StocktakeDetailPage({ params }: { params: Promise<{ id: 
         )}
 
         {/* Note */}
-        {session.note && (
+        {session?.note && (
           <div className="bg-amber-50 border border-amber-100 rounded-xl px-4 py-3 text-sm text-amber-800">
             <span className="font-semibold">Ghi chú: </span>{session.note}
           </div>
