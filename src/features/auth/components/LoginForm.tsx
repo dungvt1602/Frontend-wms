@@ -6,14 +6,15 @@ import {
   Eye, EyeOff, Loader2, Warehouse,
   Mail, Lock, Package, TrendingUp, Truck, Users,
 } from "lucide-react";
+import { useLogin } from "@/features/auth/hooks/useLogin";
 import { cn } from "@/lib/utils";
 
 /* ─── Dữ liệu tĩnh cho panel trái ─── */
 const stats = [
-  { icon: Package,    value: "12,480", label: "Sản phẩm trong kho" },
-  { icon: Truck,      value: "340",    label: "Đơn xuất hôm nay" },
-  { icon: TrendingUp, value: "98.2%",  label: "Độ chính xác" },
-  { icon: Users,      value: "56",     label: "Nhân viên hoạt động" },
+  { icon: Package, value: "12,480", label: "Sản phẩm trong kho" },
+  { icon: Truck, value: "340", label: "Đơn xuất hôm nay" },
+  { icon: TrendingUp, value: "98.2%", label: "Độ chính xác" },
+  { icon: Users, value: "56", label: "Nhân viên hoạt động" },
 ];
 
 interface FormErrors {
@@ -24,13 +25,14 @@ interface FormErrors {
 
 export default function LoginForm() {
   const router = useRouter();
-  const [email, setEmail]               = useState("");
-  const [password, setPassword]         = useState("");
+  const loginMutation = useLogin();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [remember, setRemember]         = useState(false);
-  const [isLoading, setIsLoading]       = useState(false);
-  const [errors, setErrors]             = useState<FormErrors>({});
-  const [isLeaving, setIsLeaving]       = useState(false);
+  const [remember, setRemember] = useState(false);
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [isLeaving, setIsLeaving] = useState(false);
+  const isLoading = loginMutation.isPending;
 
   function navigate(path: string) {
     setIsLeaving(true);
@@ -39,28 +41,37 @@ export default function LoginForm() {
 
   function validate(): boolean {
     const e: FormErrors = {};
-    if (!email.trim())                               e.email    = "Vui lòng nhập email";
+    if (!email.trim()) e.email = "Vui lòng nhập email";
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) e.email = "Email không hợp lệ";
-    if (!password.trim())                            e.password = "Vui lòng nhập mật khẩu";
-    else if (password.length < 6)                   e.password = "Mật khẩu tối thiểu 6 ký tự";
+    if (!password.trim()) e.password = "Vui lòng nhập mật khẩu";
+    else if (password.length < 6) e.password = "Mật khẩu tối thiểu 6 ký tự";
     setErrors(e);
     return Object.keys(e).length === 0;
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!validate()) return;
-    setIsLoading(true);
+    console.log(">>> Submit login click"); // Log 1
+
+    if (!validate()) {
+      console.log(">>> Validation failed", errors); // Log 2
+      return;
+    }
+
     setErrors({});
     try {
-      await new Promise((res) => setTimeout(res, 1500)); // TODO: next-auth signIn()
+      await loginMutation.mutateAsync({ email, password, remember });
       router.push("/");
-    } catch {
-      setErrors({ general: "Email hoặc mật khẩu không đúng. Vui lòng thử lại." });
-    } finally {
-      setIsLoading(false);
+    } catch (error: any) {
+      // Chuyển đổi tin nhắn lỗi sang tiếng Việt cho thân thiện
+      let message = error.message;
+      if (message === "Bad credentials") {
+        message = "Email hoặc mật khẩu không chính xác.";
+      }
+      setErrors({ general: message || "Đăng nhập thất bại. Vui lòng thử lại." });
     }
   }
+
 
   return (
     <div className={cn(
@@ -72,19 +83,19 @@ export default function LoginForm() {
           LEFT — Branding & Stats Panel
       ════════════════════════════════ */}
       <div className="hidden lg:flex lg:w-[52%] relative flex-col justify-between p-12 overflow-hidden"
-           style={{ background: "linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%)" }}>
+        style={{ background: "linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%)" }}>
 
         {/* Background decorations */}
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-[-80px] left-[-80px] w-[400px] h-[400px] rounded-full"
-               style={{ background: "radial-gradient(circle, rgba(99,102,241,0.15) 0%, transparent 70%)" }} />
+            style={{ background: "radial-gradient(circle, rgba(99,102,241,0.15) 0%, transparent 70%)" }} />
           <div className="absolute bottom-[-100px] right-[-60px] w-[350px] h-[350px] rounded-full"
-               style={{ background: "radial-gradient(circle, rgba(59,130,246,0.1) 0%, transparent 70%)" }} />
+            style={{ background: "radial-gradient(circle, rgba(59,130,246,0.1) 0%, transparent 70%)" }} />
           {/* Grid pattern */}
           <svg className="absolute inset-0 w-full h-full opacity-[0.04]" xmlns="http://www.w3.org/2000/svg">
             <defs>
               <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="white" strokeWidth="1"/>
+                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="white" strokeWidth="1" />
               </pattern>
             </defs>
             <rect width="100%" height="100%" fill="url(#grid)" />
@@ -94,7 +105,7 @@ export default function LoginForm() {
         {/* Logo */}
         <div className="relative z-10 flex items-center gap-3">
           <div className="flex items-center justify-center w-10 h-10 rounded-xl"
-               style={{ background: "linear-gradient(135deg, #6366f1, #4f46e5)" }}>
+            style={{ background: "linear-gradient(135deg, #6366f1, #4f46e5)" }}>
             <Warehouse className="h-5 w-5 text-white" />
           </div>
           <div>
@@ -107,7 +118,7 @@ export default function LoginForm() {
         <div className="relative z-10 space-y-8">
           <div className="space-y-3">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium text-indigo-300"
-                 style={{ background: "rgba(99,102,241,0.15)", border: "1px solid rgba(99,102,241,0.3)" }}>
+              style={{ background: "rgba(99,102,241,0.15)", border: "1px solid rgba(99,102,241,0.3)" }}>
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
               Hệ thống đang hoạt động
             </div>
@@ -127,11 +138,11 @@ export default function LoginForm() {
           <div className="grid grid-cols-2 gap-3">
             {stats.map(({ icon: Icon, value, label }) => (
               <div key={label}
-                   className="rounded-xl p-4 space-y-2"
-                   style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", backdropFilter: "blur(8px)" }}>
+                className="rounded-xl p-4 space-y-2"
+                style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", backdropFilter: "blur(8px)" }}>
                 <div className="flex items-center gap-2">
                   <div className="w-7 h-7 rounded-lg flex items-center justify-center"
-                       style={{ background: "rgba(99,102,241,0.2)" }}>
+                    style={{ background: "rgba(99,102,241,0.2)" }}>
                     <Icon className="h-3.5 w-3.5 text-indigo-400" />
                   </div>
                 </div>
@@ -169,7 +180,7 @@ export default function LoginForm() {
               {/* WMS Brand mark */}
               <div className="relative">
                 <div className="w-14 h-14 rounded-2xl flex items-center justify-center"
-                     style={{ background: "linear-gradient(135deg,#6366f1,#4f46e5)", boxShadow: "0 8px 24px rgba(99,102,241,0.35)" }}>
+                  style={{ background: "linear-gradient(135deg,#6366f1,#4f46e5)", boxShadow: "0 8px 24px rgba(99,102,241,0.35)" }}>
                   <Warehouse className="h-7 w-7 text-white" />
                 </div>
                 {/* Online dot */}
@@ -189,7 +200,7 @@ export default function LoginForm() {
               <p className="text-slate-400 text-sm mt-0.5">
                 Chưa có tài khoản?{" "}
                 <button type="button" onClick={() => navigate("/register")}
-                        className="text-indigo-600 hover:text-indigo-700 font-medium transition-colors">
+                  className="text-indigo-600 hover:text-indigo-700 font-medium transition-colors">
                   Đăng ký ngay
                 </button>
               </p>
@@ -199,7 +210,7 @@ export default function LoginForm() {
           {/* Error banner */}
           {errors.general && (
             <div className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm text-red-700"
-                 style={{ background: "#fef2f2", border: "1px solid #fecaca" }}>
+              style={{ background: "#fef2f2", border: "1px solid #fecaca" }}>
               <span className="flex-shrink-0 w-5 h-5 rounded-full bg-red-100 flex items-center justify-center text-red-500 text-xs font-bold">!</span>
               {errors.general}
             </div>
@@ -250,7 +261,7 @@ export default function LoginForm() {
                   Mật khẩu
                 </label>
                 <button type="button"
-                        className="text-xs font-medium text-indigo-600 hover:text-indigo-700 transition-colors">
+                  className="text-xs font-medium text-indigo-600 hover:text-indigo-700 transition-colors">
                   Quên mật khẩu?
                 </button>
               </div>
@@ -310,7 +321,7 @@ export default function LoginForm() {
                 )}>
                   {remember && (
                     <svg className="w-2.5 h-2.5 text-white" viewBox="0 0 10 8" fill="none">
-                      <path d="M1 4L3.5 6.5L9 1" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M1 4L3.5 6.5L9 1" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                   )}
                 </div>

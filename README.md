@@ -39,7 +39,7 @@ cd wms-frontend
 npm install
 
 # 3. Tạo file môi trường
-cp .env.example .env.local
+cp .env.local .env.example
 # Chỉnh sửa .env.local với thông tin backend
 
 # 4. Chạy môi trường development
