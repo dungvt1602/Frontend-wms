@@ -64,10 +64,12 @@ export default function CameraMode({ items, onItemScanned }: CameraModeProps) {
   const isPausedRef   = useRef(false);
   const isRunningRef  = useRef(false);
   const autoModeRef   = useRef(false);   // mirror of autoMode for use inside callback
-  const notFoundTimer = useRef<ReturnType<typeof setTimeout>>();
+  const notFoundTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   // Keep autoModeRef in sync
-  autoModeRef.current = autoMode;
+  useEffect(() => {
+    autoModeRef.current = autoMode;
+  }, [autoMode]);
 
   // ── Flash helper ──────────────────────────────────────────────────────────────
 
@@ -129,10 +131,11 @@ export default function CameraMode({ items, onItemScanned }: CameraModeProps) {
 
       isRunningRef.current = true;
       setCamState("active");
-    } catch (err: any) {
+    } catch (err: unknown) {
       html5QrRef.current = null;
       setCamState("error");
-      setErrorMsg(err?.message ?? "Không thể truy cập camera");
+      const msg = err instanceof Error ? err.message : "Không thể truy cập camera";
+      setErrorMsg(msg);
     }
   }
 

@@ -272,7 +272,7 @@ export default function WarehouseDetailPage({ params }: { params: Promise<{ id: 
           <div className="flex flex-col items-center justify-center py-14 text-slate-400">
             <LayoutGrid size={32} className="opacity-25 mb-3" />
             <p className="text-sm">Chưa có khu vực nào</p>
-            <p className="text-xs mt-1 text-slate-300">Nhấn "+ Thêm khu vực" để bắt đầu</p>
+            <p className="text-xs mt-1 text-slate-300">Nhấn &quot;+ Thêm khu vực&quot; để bắt đầu</p>
           </div>
         ) : (
           <div className="overflow-x-auto">

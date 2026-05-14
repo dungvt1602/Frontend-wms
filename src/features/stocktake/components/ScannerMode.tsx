@@ -36,8 +36,8 @@ function formatNum(n: number) {
 
 export default function ScannerMode({ items, onItemScanned }: ScannerModeProps) {
   const scanInputRef  = useRef<HTMLInputElement>(null);
-  const errorTimerRef = useRef<ReturnType<typeof setTimeout>>();
-  const flashTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const errorTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const flashTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const { confirm, modal } = useConfirm();
 
