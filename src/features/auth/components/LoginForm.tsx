@@ -51,27 +51,23 @@ export default function LoginForm() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    console.log(">>> Submit login click"); // Log 1
 
     if (!validate()) {
-      console.log(">>> Validation failed", errors); // Log 2
       return;
     }
 
     setErrors({});
+
     try {
       await loginMutation.mutateAsync({ email, password, remember });
       router.push("/");
     } catch (error: unknown) {
-      // Chuyển đổi tin nhắn lỗi sang tiếng Việt cho thân thiện
-      let message = "";
-      if (error instanceof Error) {
-        message = error.message;
-      }
-      if (message === "Bad credentials") {
-        message = "Email hoặc mật khẩu không chính xác.";
-      }
-      setErrors({ general: message || "Đăng nhập thất bại. Vui lòng thử lại." });
+      const message =
+        error instanceof Error && error.message
+          ? error.message
+          : "Đăng nhập thất bại. Vui lòng thử lại.";
+
+      setErrors({ general: message });
     }
   }
 

@@ -1,13 +1,6 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
 import QueryProvider from "@/providers/query-provider";
-
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   title: "WMS - Warehouse Management System",
@@ -20,8 +13,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="vi" className={`${inter.variable} h-full antialiased`} suppressHydrationWarning>
-      <body className={`${inter.className} min-h-full flex flex-col`} suppressHydrationWarning>
+    <html lang="vi" className="h-full antialiased" suppressHydrationWarning>
+      <body className="min-h-full flex flex-col font-sans" suppressHydrationWarning>
         <QueryProvider>{children}</QueryProvider>
       </body>
     </html>
