@@ -18,6 +18,8 @@ export default function LogoutPage() {
   const handleLogout = async () => {
     setStep("loading");
     await new Promise((r) => setTimeout(r, 1200));
+    document.cookie = "token=; path=/; max-age=0; SameSite=Lax";
+    document.cookie = "refreshToken=; path=/; max-age=0; SameSite=Lax";
     setStep("done");
   };
 

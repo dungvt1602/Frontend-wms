@@ -1,11 +1,11 @@
-import { publicClient } from "@/lib/api-client";
-import type { LoginPayload, LoginResponse } from "../types/auth.types";
+import { login as loginApi } from "@/lib/generated/auth-controller/auth-controller";
+import type { LoginRequest } from "@/lib/generated/model";
 
 export const authApi = {
-  login(payload: LoginPayload) {
-    return publicClient.post<LoginResponse>("/auth/login", {
-      username: payload.email,
-      password: payload.password,
+  login(payload: LoginRequest) {
+    return loginApi(payload, {
+      baseURL: process.env.NEXT_PUBLIC_API_URL,
+      headers: { "Content-Type": "application/json" },
     });
   },
 };
