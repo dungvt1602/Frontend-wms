@@ -12,7 +12,6 @@ export default defineConfig({
       httpClient: "axios",
       mode: "tags-split",   // Chia các hàm gọi API thành các file riêng biệt dựa trên tags được định nghĩa trong OpenAPI Spec
       clean: true,
-      prettier: true,
       override: {
         query: {
           useQuery: true,
