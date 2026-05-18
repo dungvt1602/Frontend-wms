@@ -20,13 +20,6 @@ import type {
   UseQueryResult
 } from '@tanstack/react-query';
 
-import axios from 'axios';
-import type {
-  AxiosError,
-  AxiosRequestConfig,
-  AxiosResponse
-} from 'axios';
-
 import type {
   ApiResponseInventoryDashboardResponse,
   ApiResponsePageInventorySummaryResponse,
@@ -38,21 +31,25 @@ import type {
   GetTransferHistoryParams
 } from '../model';
 
+import { customInstance } from '../../api-client';
 
+
+type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 
 export const getTransferHistory = (
-    params: GetTransferHistoryParams, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<ApiResponsePageTransferReport>> => {
+    params: GetTransferHistoryParams,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
 
 
-    return axios.get(
-      `/api/v1/reports/inventory/transfers`,{
-    ...options,
-        params: {...params, ...options?.params},}
-    );
-  }
+      return customInstance<ApiResponsePageTransferReport>(
+      {url: `/api/v1/reports/inventory/transfers`, method: 'GET',
+        params, signal
+    },
+      options);
+    }
 
 
 
@@ -64,16 +61,16 @@ export const getGetTransferHistoryQueryKey = (params?: GetTransferHistoryParams,
     }
 
 
-export const getGetTransferHistoryQueryOptions = <TData = Awaited<ReturnType<typeof getTransferHistory>>, TError = AxiosError<unknown>>(params: GetTransferHistoryParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTransferHistory>>, TError, TData>>, axios?: AxiosRequestConfig}
+export const getGetTransferHistoryQueryOptions = <TData = Awaited<ReturnType<typeof getTransferHistory>>, TError = unknown>(params: GetTransferHistoryParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTransferHistory>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
-const {query: queryOptions, axios: axiosOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetTransferHistoryQueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getTransferHistory>>> = ({ signal }) => getTransferHistory(params, { signal, ...axiosOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getTransferHistory>>> = ({ signal }) => getTransferHistory(params, requestOptions, signal);
 
 
 
@@ -83,36 +80,36 @@ const {query: queryOptions, axios: axiosOptions} = options ?? {};
 }
 
 export type GetTransferHistoryQueryResult = NonNullable<Awaited<ReturnType<typeof getTransferHistory>>>
-export type GetTransferHistoryQueryError = AxiosError<unknown>
+export type GetTransferHistoryQueryError = unknown
 
 
-export function useGetTransferHistory<TData = Awaited<ReturnType<typeof getTransferHistory>>, TError = AxiosError<unknown>>(
+export function useGetTransferHistory<TData = Awaited<ReturnType<typeof getTransferHistory>>, TError = unknown>(
  params: GetTransferHistoryParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTransferHistory>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getTransferHistory>>,
           TError,
           Awaited<ReturnType<typeof getTransferHistory>>
         > , 'initialData'
-      >, axios?: AxiosRequestConfig}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetTransferHistory<TData = Awaited<ReturnType<typeof getTransferHistory>>, TError = AxiosError<unknown>>(
+export function useGetTransferHistory<TData = Awaited<ReturnType<typeof getTransferHistory>>, TError = unknown>(
  params: GetTransferHistoryParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTransferHistory>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getTransferHistory>>,
           TError,
           Awaited<ReturnType<typeof getTransferHistory>>
         > , 'initialData'
-      >, axios?: AxiosRequestConfig}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetTransferHistory<TData = Awaited<ReturnType<typeof getTransferHistory>>, TError = AxiosError<unknown>>(
- params: GetTransferHistoryParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTransferHistory>>, TError, TData>>, axios?: AxiosRequestConfig}
+export function useGetTransferHistory<TData = Awaited<ReturnType<typeof getTransferHistory>>, TError = unknown>(
+ params: GetTransferHistoryParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTransferHistory>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useGetTransferHistory<TData = Awaited<ReturnType<typeof getTransferHistory>>, TError = AxiosError<unknown>>(
- params: GetTransferHistoryParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTransferHistory>>, TError, TData>>, axios?: AxiosRequestConfig}
+export function useGetTransferHistory<TData = Awaited<ReturnType<typeof getTransferHistory>>, TError = unknown>(
+ params: GetTransferHistoryParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTransferHistory>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -129,16 +126,17 @@ export function useGetTransferHistory<TData = Awaited<ReturnType<typeof getTrans
 
 
 export const getInventorySummary = (
-    params: GetInventorySummaryParams, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<ApiResponsePageInventorySummaryResponse>> => {
+    params: GetInventorySummaryParams,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
 
 
-    return axios.get(
-      `/api/v1/reports/inventory/summary`,{
-    ...options,
-        params: {...params, ...options?.params},}
-    );
-  }
+      return customInstance<ApiResponsePageInventorySummaryResponse>(
+      {url: `/api/v1/reports/inventory/summary`, method: 'GET',
+        params, signal
+    },
+      options);
+    }
 
 
 
@@ -150,16 +148,16 @@ export const getGetInventorySummaryQueryKey = (params?: GetInventorySummaryParam
     }
 
 
-export const getGetInventorySummaryQueryOptions = <TData = Awaited<ReturnType<typeof getInventorySummary>>, TError = AxiosError<unknown>>(params: GetInventorySummaryParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getInventorySummary>>, TError, TData>>, axios?: AxiosRequestConfig}
+export const getGetInventorySummaryQueryOptions = <TData = Awaited<ReturnType<typeof getInventorySummary>>, TError = unknown>(params: GetInventorySummaryParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getInventorySummary>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
-const {query: queryOptions, axios: axiosOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetInventorySummaryQueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getInventorySummary>>> = ({ signal }) => getInventorySummary(params, { signal, ...axiosOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getInventorySummary>>> = ({ signal }) => getInventorySummary(params, requestOptions, signal);
 
 
 
@@ -169,36 +167,36 @@ const {query: queryOptions, axios: axiosOptions} = options ?? {};
 }
 
 export type GetInventorySummaryQueryResult = NonNullable<Awaited<ReturnType<typeof getInventorySummary>>>
-export type GetInventorySummaryQueryError = AxiosError<unknown>
+export type GetInventorySummaryQueryError = unknown
 
 
-export function useGetInventorySummary<TData = Awaited<ReturnType<typeof getInventorySummary>>, TError = AxiosError<unknown>>(
+export function useGetInventorySummary<TData = Awaited<ReturnType<typeof getInventorySummary>>, TError = unknown>(
  params: GetInventorySummaryParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getInventorySummary>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getInventorySummary>>,
           TError,
           Awaited<ReturnType<typeof getInventorySummary>>
         > , 'initialData'
-      >, axios?: AxiosRequestConfig}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetInventorySummary<TData = Awaited<ReturnType<typeof getInventorySummary>>, TError = AxiosError<unknown>>(
+export function useGetInventorySummary<TData = Awaited<ReturnType<typeof getInventorySummary>>, TError = unknown>(
  params: GetInventorySummaryParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getInventorySummary>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getInventorySummary>>,
           TError,
           Awaited<ReturnType<typeof getInventorySummary>>
         > , 'initialData'
-      >, axios?: AxiosRequestConfig}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetInventorySummary<TData = Awaited<ReturnType<typeof getInventorySummary>>, TError = AxiosError<unknown>>(
- params: GetInventorySummaryParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getInventorySummary>>, TError, TData>>, axios?: AxiosRequestConfig}
+export function useGetInventorySummary<TData = Awaited<ReturnType<typeof getInventorySummary>>, TError = unknown>(
+ params: GetInventorySummaryParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getInventorySummary>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useGetInventorySummary<TData = Awaited<ReturnType<typeof getInventorySummary>>, TError = AxiosError<unknown>>(
- params: GetInventorySummaryParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getInventorySummary>>, TError, TData>>, axios?: AxiosRequestConfig}
+export function useGetInventorySummary<TData = Awaited<ReturnType<typeof getInventorySummary>>, TError = unknown>(
+ params: GetInventorySummaryParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getInventorySummary>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -215,16 +213,17 @@ export function useGetInventorySummary<TData = Awaited<ReturnType<typeof getInve
 
 
 export const getStockHistory = (
-    params: GetStockHistoryParams, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<ApiResponsePageStockMovementResponse>> => {
+    params: GetStockHistoryParams,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
 
 
-    return axios.get(
-      `/api/v1/reports/inventory/history`,{
-    ...options,
-        params: {...params, ...options?.params},}
-    );
-  }
+      return customInstance<ApiResponsePageStockMovementResponse>(
+      {url: `/api/v1/reports/inventory/history`, method: 'GET',
+        params, signal
+    },
+      options);
+    }
 
 
 
@@ -236,16 +235,16 @@ export const getGetStockHistoryQueryKey = (params?: GetStockHistoryParams,) => {
     }
 
 
-export const getGetStockHistoryQueryOptions = <TData = Awaited<ReturnType<typeof getStockHistory>>, TError = AxiosError<unknown>>(params: GetStockHistoryParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStockHistory>>, TError, TData>>, axios?: AxiosRequestConfig}
+export const getGetStockHistoryQueryOptions = <TData = Awaited<ReturnType<typeof getStockHistory>>, TError = unknown>(params: GetStockHistoryParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStockHistory>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
-const {query: queryOptions, axios: axiosOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetStockHistoryQueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getStockHistory>>> = ({ signal }) => getStockHistory(params, { signal, ...axiosOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getStockHistory>>> = ({ signal }) => getStockHistory(params, requestOptions, signal);
 
 
 
@@ -255,36 +254,36 @@ const {query: queryOptions, axios: axiosOptions} = options ?? {};
 }
 
 export type GetStockHistoryQueryResult = NonNullable<Awaited<ReturnType<typeof getStockHistory>>>
-export type GetStockHistoryQueryError = AxiosError<unknown>
+export type GetStockHistoryQueryError = unknown
 
 
-export function useGetStockHistory<TData = Awaited<ReturnType<typeof getStockHistory>>, TError = AxiosError<unknown>>(
+export function useGetStockHistory<TData = Awaited<ReturnType<typeof getStockHistory>>, TError = unknown>(
  params: GetStockHistoryParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStockHistory>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getStockHistory>>,
           TError,
           Awaited<ReturnType<typeof getStockHistory>>
         > , 'initialData'
-      >, axios?: AxiosRequestConfig}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetStockHistory<TData = Awaited<ReturnType<typeof getStockHistory>>, TError = AxiosError<unknown>>(
+export function useGetStockHistory<TData = Awaited<ReturnType<typeof getStockHistory>>, TError = unknown>(
  params: GetStockHistoryParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStockHistory>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getStockHistory>>,
           TError,
           Awaited<ReturnType<typeof getStockHistory>>
         > , 'initialData'
-      >, axios?: AxiosRequestConfig}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetStockHistory<TData = Awaited<ReturnType<typeof getStockHistory>>, TError = AxiosError<unknown>>(
- params: GetStockHistoryParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStockHistory>>, TError, TData>>, axios?: AxiosRequestConfig}
+export function useGetStockHistory<TData = Awaited<ReturnType<typeof getStockHistory>>, TError = unknown>(
+ params: GetStockHistoryParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStockHistory>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useGetStockHistory<TData = Awaited<ReturnType<typeof getStockHistory>>, TError = AxiosError<unknown>>(
- params: GetStockHistoryParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStockHistory>>, TError, TData>>, axios?: AxiosRequestConfig}
+export function useGetStockHistory<TData = Awaited<ReturnType<typeof getStockHistory>>, TError = unknown>(
+ params: GetStockHistoryParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStockHistory>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -301,16 +300,17 @@ export function useGetStockHistory<TData = Awaited<ReturnType<typeof getStockHis
 
 
 export const getDashboard = (
-    params?: GetDashboardParams, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<ApiResponseInventoryDashboardResponse>> => {
+    params?: GetDashboardParams,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
 
 
-    return axios.get(
-      `/api/v1/reports/inventory/dashboard`,{
-    ...options,
-        params: {...params, ...options?.params},}
-    );
-  }
+      return customInstance<ApiResponseInventoryDashboardResponse>(
+      {url: `/api/v1/reports/inventory/dashboard`, method: 'GET',
+        params, signal
+    },
+      options);
+    }
 
 
 
@@ -322,16 +322,16 @@ export const getGetDashboardQueryKey = (params?: GetDashboardParams,) => {
     }
 
 
-export const getGetDashboardQueryOptions = <TData = Awaited<ReturnType<typeof getDashboard>>, TError = AxiosError<unknown>>(params?: GetDashboardParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getDashboard>>, TError, TData>>, axios?: AxiosRequestConfig}
+export const getGetDashboardQueryOptions = <TData = Awaited<ReturnType<typeof getDashboard>>, TError = unknown>(params?: GetDashboardParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getDashboard>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
-const {query: queryOptions, axios: axiosOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetDashboardQueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getDashboard>>> = ({ signal }) => getDashboard(params, { signal, ...axiosOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getDashboard>>> = ({ signal }) => getDashboard(params, requestOptions, signal);
 
 
 
@@ -341,36 +341,36 @@ const {query: queryOptions, axios: axiosOptions} = options ?? {};
 }
 
 export type GetDashboardQueryResult = NonNullable<Awaited<ReturnType<typeof getDashboard>>>
-export type GetDashboardQueryError = AxiosError<unknown>
+export type GetDashboardQueryError = unknown
 
 
-export function useGetDashboard<TData = Awaited<ReturnType<typeof getDashboard>>, TError = AxiosError<unknown>>(
+export function useGetDashboard<TData = Awaited<ReturnType<typeof getDashboard>>, TError = unknown>(
  params: undefined |  GetDashboardParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getDashboard>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getDashboard>>,
           TError,
           Awaited<ReturnType<typeof getDashboard>>
         > , 'initialData'
-      >, axios?: AxiosRequestConfig}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetDashboard<TData = Awaited<ReturnType<typeof getDashboard>>, TError = AxiosError<unknown>>(
+export function useGetDashboard<TData = Awaited<ReturnType<typeof getDashboard>>, TError = unknown>(
  params?: GetDashboardParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getDashboard>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getDashboard>>,
           TError,
           Awaited<ReturnType<typeof getDashboard>>
         > , 'initialData'
-      >, axios?: AxiosRequestConfig}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetDashboard<TData = Awaited<ReturnType<typeof getDashboard>>, TError = AxiosError<unknown>>(
- params?: GetDashboardParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getDashboard>>, TError, TData>>, axios?: AxiosRequestConfig}
+export function useGetDashboard<TData = Awaited<ReturnType<typeof getDashboard>>, TError = unknown>(
+ params?: GetDashboardParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getDashboard>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useGetDashboard<TData = Awaited<ReturnType<typeof getDashboard>>, TError = AxiosError<unknown>>(
- params?: GetDashboardParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getDashboard>>, TError, TData>>, axios?: AxiosRequestConfig}
+export function useGetDashboard<TData = Awaited<ReturnType<typeof getDashboard>>, TError = unknown>(
+ params?: GetDashboardParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getDashboard>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 

@@ -9,7 +9,7 @@
 export interface TokenPairResponse {
   accessToken?: string;
   refreshToken?: string;
-  accessTokenExpiresInMs?: number;
-  refreshTokenExpiresInMs?: number;
+  accessTokenExpiresAt?: string;
+  refreshTokenExpiresAt?: string;
   username?: string;
 }

@@ -7,6 +7,9 @@
  */
 
 export interface AuthResponse {
-  token?: string;
+  accessToken?: string;
+  refreshToken?: string;
+  accessTokenExpiresAt?: string;
+  refreshTokenExpiresAt?: string;
   username?: string;
 }
