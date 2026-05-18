@@ -12,13 +12,13 @@ import type { TransferReport } from './transferReport';
 export interface PageTransferReport {
   totalElements?: number;
   totalPages?: number;
+  first?: boolean;
+  last?: boolean;
+  numberOfElements?: number;
   size?: number;
   content?: TransferReport[];
   number?: number;
   sort?: SortObject;
-  first?: boolean;
-  last?: boolean;
-  numberOfElements?: number;
   pageable?: PageableObject;
   empty?: boolean;
 }

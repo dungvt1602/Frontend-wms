@@ -20,32 +20,31 @@ import type {
   UseQueryResult
 } from '@tanstack/react-query';
 
-import axios from 'axios';
-import type {
-  AxiosError,
-  AxiosRequestConfig,
-  AxiosResponse
-} from 'axios';
-
 import type {
   ApiResponseOutboundResponse,
   OutboundRequest
 } from '../model';
 
+import { customInstance } from '../../api-client';
 
+
+type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 
 export const createOrder = (
-    outboundRequest: OutboundRequest, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<ApiResponseOutboundResponse>> => {
+    outboundRequest: OutboundRequest,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
 
 
-    return axios.post(
-      `/api/v1/outbounds`,
-      outboundRequest,options
-    );
-  }
+      return customInstance<ApiResponseOutboundResponse>(
+      {url: `/api/v1/outbounds`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: outboundRequest, signal
+    },
+      options);
+    }
 
 
 
@@ -57,16 +56,16 @@ export const getCreateOrderQueryKey = (outboundRequest?: OutboundRequest,) => {
     }
 
 
-export const getCreateOrderQueryOptions = <TData = Awaited<ReturnType<typeof createOrder>>, TError = AxiosError<unknown>>(outboundRequest: OutboundRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof createOrder>>, TError, TData>>, axios?: AxiosRequestConfig}
+export const getCreateOrderQueryOptions = <TData = Awaited<ReturnType<typeof createOrder>>, TError = unknown>(outboundRequest: OutboundRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof createOrder>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
-const {query: queryOptions, axios: axiosOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getCreateOrderQueryKey(outboundRequest);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof createOrder>>> = ({ signal }) => createOrder(outboundRequest, { signal, ...axiosOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof createOrder>>> = ({ signal }) => createOrder(outboundRequest, requestOptions, signal);
 
 
 
@@ -76,36 +75,36 @@ const {query: queryOptions, axios: axiosOptions} = options ?? {};
 }
 
 export type CreateOrderQueryResult = NonNullable<Awaited<ReturnType<typeof createOrder>>>
-export type CreateOrderQueryError = AxiosError<unknown>
+export type CreateOrderQueryError = unknown
 
 
-export function useCreateOrder<TData = Awaited<ReturnType<typeof createOrder>>, TError = AxiosError<unknown>>(
+export function useCreateOrder<TData = Awaited<ReturnType<typeof createOrder>>, TError = unknown>(
  outboundRequest: OutboundRequest, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof createOrder>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof createOrder>>,
           TError,
           Awaited<ReturnType<typeof createOrder>>
         > , 'initialData'
-      >, axios?: AxiosRequestConfig}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useCreateOrder<TData = Awaited<ReturnType<typeof createOrder>>, TError = AxiosError<unknown>>(
+export function useCreateOrder<TData = Awaited<ReturnType<typeof createOrder>>, TError = unknown>(
  outboundRequest: OutboundRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof createOrder>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof createOrder>>,
           TError,
           Awaited<ReturnType<typeof createOrder>>
         > , 'initialData'
-      >, axios?: AxiosRequestConfig}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useCreateOrder<TData = Awaited<ReturnType<typeof createOrder>>, TError = AxiosError<unknown>>(
- outboundRequest: OutboundRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof createOrder>>, TError, TData>>, axios?: AxiosRequestConfig}
+export function useCreateOrder<TData = Awaited<ReturnType<typeof createOrder>>, TError = unknown>(
+ outboundRequest: OutboundRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof createOrder>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useCreateOrder<TData = Awaited<ReturnType<typeof createOrder>>, TError = AxiosError<unknown>>(
- outboundRequest: OutboundRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof createOrder>>, TError, TData>>, axios?: AxiosRequestConfig}
+export function useCreateOrder<TData = Awaited<ReturnType<typeof createOrder>>, TError = unknown>(
+ outboundRequest: OutboundRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof createOrder>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -123,15 +122,18 @@ export function useCreateOrder<TData = Awaited<ReturnType<typeof createOrder>>, 
 
 export const completeOrder = (
     orderId: number,
-    completeOrderBody: number, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<ApiResponseOutboundResponse>> => {
+    completeOrderBody: number,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
 
 
-    return axios.patch(
-      `/api/v1/outbounds/${orderId}/complete`,
-      completeOrderBody,options
-    );
-  }
+      return customInstance<ApiResponseOutboundResponse>(
+      {url: `/api/v1/outbounds/${orderId}/complete`, method: 'PATCH',
+      headers: {'Content-Type': 'application/json', },
+      data: completeOrderBody, signal
+    },
+      options);
+    }
 
 
 
@@ -144,17 +146,17 @@ export const getCompleteOrderQueryKey = (orderId: number,
     }
 
 
-export const getCompleteOrderQueryOptions = <TData = Awaited<ReturnType<typeof completeOrder>>, TError = AxiosError<unknown>>(orderId: number,
-    completeOrderBody: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof completeOrder>>, TError, TData>>, axios?: AxiosRequestConfig}
+export const getCompleteOrderQueryOptions = <TData = Awaited<ReturnType<typeof completeOrder>>, TError = unknown>(orderId: number,
+    completeOrderBody: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof completeOrder>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
-const {query: queryOptions, axios: axiosOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getCompleteOrderQueryKey(orderId,completeOrderBody);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof completeOrder>>> = ({ signal }) => completeOrder(orderId,completeOrderBody, { signal, ...axiosOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof completeOrder>>> = ({ signal }) => completeOrder(orderId,completeOrderBody, requestOptions, signal);
 
 
 
@@ -164,10 +166,10 @@ const {query: queryOptions, axios: axiosOptions} = options ?? {};
 }
 
 export type CompleteOrderQueryResult = NonNullable<Awaited<ReturnType<typeof completeOrder>>>
-export type CompleteOrderQueryError = AxiosError<unknown>
+export type CompleteOrderQueryError = unknown
 
 
-export function useCompleteOrder<TData = Awaited<ReturnType<typeof completeOrder>>, TError = AxiosError<unknown>>(
+export function useCompleteOrder<TData = Awaited<ReturnType<typeof completeOrder>>, TError = unknown>(
  orderId: number,
     completeOrderBody: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof completeOrder>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
@@ -175,10 +177,10 @@ export function useCompleteOrder<TData = Awaited<ReturnType<typeof completeOrder
           TError,
           Awaited<ReturnType<typeof completeOrder>>
         > , 'initialData'
-      >, axios?: AxiosRequestConfig}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useCompleteOrder<TData = Awaited<ReturnType<typeof completeOrder>>, TError = AxiosError<unknown>>(
+export function useCompleteOrder<TData = Awaited<ReturnType<typeof completeOrder>>, TError = unknown>(
  orderId: number,
     completeOrderBody: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof completeOrder>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
@@ -186,18 +188,18 @@ export function useCompleteOrder<TData = Awaited<ReturnType<typeof completeOrder
           TError,
           Awaited<ReturnType<typeof completeOrder>>
         > , 'initialData'
-      >, axios?: AxiosRequestConfig}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useCompleteOrder<TData = Awaited<ReturnType<typeof completeOrder>>, TError = AxiosError<unknown>>(
+export function useCompleteOrder<TData = Awaited<ReturnType<typeof completeOrder>>, TError = unknown>(
  orderId: number,
-    completeOrderBody: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof completeOrder>>, TError, TData>>, axios?: AxiosRequestConfig}
+    completeOrderBody: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof completeOrder>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useCompleteOrder<TData = Awaited<ReturnType<typeof completeOrder>>, TError = AxiosError<unknown>>(
+export function useCompleteOrder<TData = Awaited<ReturnType<typeof completeOrder>>, TError = unknown>(
  orderId: number,
-    completeOrderBody: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof completeOrder>>, TError, TData>>, axios?: AxiosRequestConfig}
+    completeOrderBody: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof completeOrder>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -214,15 +216,16 @@ export function useCompleteOrder<TData = Awaited<ReturnType<typeof completeOrder
 
 
 export const cancelOrder = (
-    orderId: number, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<ApiResponseOutboundResponse>> => {
+    orderId: number,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
 
 
-    return axios.patch(
-      `/api/v1/outbounds/${orderId}/cancel`,
-      undefined,options
-    );
-  }
+      return customInstance<ApiResponseOutboundResponse>(
+      {url: `/api/v1/outbounds/${orderId}/cancel`, method: 'PATCH', signal
+    },
+      options);
+    }
 
 
 
@@ -234,16 +237,16 @@ export const getCancelOrderQueryKey = (orderId: number,) => {
     }
 
 
-export const getCancelOrderQueryOptions = <TData = Awaited<ReturnType<typeof cancelOrder>>, TError = AxiosError<unknown>>(orderId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof cancelOrder>>, TError, TData>>, axios?: AxiosRequestConfig}
+export const getCancelOrderQueryOptions = <TData = Awaited<ReturnType<typeof cancelOrder>>, TError = unknown>(orderId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof cancelOrder>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
-const {query: queryOptions, axios: axiosOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getCancelOrderQueryKey(orderId);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof cancelOrder>>> = ({ signal }) => cancelOrder(orderId, { signal, ...axiosOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof cancelOrder>>> = ({ signal }) => cancelOrder(orderId, requestOptions, signal);
 
 
 
@@ -253,36 +256,36 @@ const {query: queryOptions, axios: axiosOptions} = options ?? {};
 }
 
 export type CancelOrderQueryResult = NonNullable<Awaited<ReturnType<typeof cancelOrder>>>
-export type CancelOrderQueryError = AxiosError<unknown>
+export type CancelOrderQueryError = unknown
 
 
-export function useCancelOrder<TData = Awaited<ReturnType<typeof cancelOrder>>, TError = AxiosError<unknown>>(
+export function useCancelOrder<TData = Awaited<ReturnType<typeof cancelOrder>>, TError = unknown>(
  orderId: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof cancelOrder>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof cancelOrder>>,
           TError,
           Awaited<ReturnType<typeof cancelOrder>>
         > , 'initialData'
-      >, axios?: AxiosRequestConfig}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useCancelOrder<TData = Awaited<ReturnType<typeof cancelOrder>>, TError = AxiosError<unknown>>(
+export function useCancelOrder<TData = Awaited<ReturnType<typeof cancelOrder>>, TError = unknown>(
  orderId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof cancelOrder>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof cancelOrder>>,
           TError,
           Awaited<ReturnType<typeof cancelOrder>>
         > , 'initialData'
-      >, axios?: AxiosRequestConfig}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useCancelOrder<TData = Awaited<ReturnType<typeof cancelOrder>>, TError = AxiosError<unknown>>(
- orderId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof cancelOrder>>, TError, TData>>, axios?: AxiosRequestConfig}
+export function useCancelOrder<TData = Awaited<ReturnType<typeof cancelOrder>>, TError = unknown>(
+ orderId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof cancelOrder>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useCancelOrder<TData = Awaited<ReturnType<typeof cancelOrder>>, TError = AxiosError<unknown>>(
- orderId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof cancelOrder>>, TError, TData>>, axios?: AxiosRequestConfig}
+export function useCancelOrder<TData = Awaited<ReturnType<typeof cancelOrder>>, TError = unknown>(
+ orderId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof cancelOrder>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 

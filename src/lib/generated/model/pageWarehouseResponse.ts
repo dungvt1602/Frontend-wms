@@ -12,13 +12,13 @@ import type { WarehouseResponse } from './warehouseResponse';
 export interface PageWarehouseResponse {
   totalElements?: number;
   totalPages?: number;
+  first?: boolean;
+  last?: boolean;
+  numberOfElements?: number;
   size?: number;
   content?: WarehouseResponse[];
   number?: number;
   sort?: SortObject;
-  first?: boolean;
-  last?: boolean;
-  numberOfElements?: number;
   pageable?: PageableObject;
   empty?: boolean;
 }

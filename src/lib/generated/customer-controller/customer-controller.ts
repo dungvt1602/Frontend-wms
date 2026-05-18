@@ -20,13 +20,6 @@ import type {
   UseQueryResult
 } from '@tanstack/react-query';
 
-import axios from 'axios';
-import type {
-  AxiosError,
-  AxiosRequestConfig,
-  AxiosResponse
-} from 'axios';
-
 import type {
   ApiResponsePagePartnerResponse,
   ApiResponsePartnerResponse,
@@ -35,19 +28,24 @@ import type {
   PartnerRequest
 } from '../model';
 
+import { customInstance } from '../../api-client';
 
+
+type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 
 export const getPartnerById = (
-    id: number, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<ApiResponsePartnerResponse>> => {
+    id: number,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
 
 
-    return axios.get(
-      `/api/v1/partners/${id}`,options
-    );
-  }
+      return customInstance<ApiResponsePartnerResponse>(
+      {url: `/api/v1/partners/${id}`, method: 'GET', signal
+    },
+      options);
+    }
 
 
 
@@ -59,16 +57,16 @@ export const getGetPartnerByIdQueryKey = (id: number,) => {
     }
 
 
-export const getGetPartnerByIdQueryOptions = <TData = Awaited<ReturnType<typeof getPartnerById>>, TError = AxiosError<unknown>>(id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPartnerById>>, TError, TData>>, axios?: AxiosRequestConfig}
+export const getGetPartnerByIdQueryOptions = <TData = Awaited<ReturnType<typeof getPartnerById>>, TError = unknown>(id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPartnerById>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
-const {query: queryOptions, axios: axiosOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetPartnerByIdQueryKey(id);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPartnerById>>> = ({ signal }) => getPartnerById(id, { signal, ...axiosOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPartnerById>>> = ({ signal }) => getPartnerById(id, requestOptions, signal);
 
 
 
@@ -78,36 +76,36 @@ const {query: queryOptions, axios: axiosOptions} = options ?? {};
 }
 
 export type GetPartnerByIdQueryResult = NonNullable<Awaited<ReturnType<typeof getPartnerById>>>
-export type GetPartnerByIdQueryError = AxiosError<unknown>
+export type GetPartnerByIdQueryError = unknown
 
 
-export function useGetPartnerById<TData = Awaited<ReturnType<typeof getPartnerById>>, TError = AxiosError<unknown>>(
+export function useGetPartnerById<TData = Awaited<ReturnType<typeof getPartnerById>>, TError = unknown>(
  id: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPartnerById>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getPartnerById>>,
           TError,
           Awaited<ReturnType<typeof getPartnerById>>
         > , 'initialData'
-      >, axios?: AxiosRequestConfig}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetPartnerById<TData = Awaited<ReturnType<typeof getPartnerById>>, TError = AxiosError<unknown>>(
+export function useGetPartnerById<TData = Awaited<ReturnType<typeof getPartnerById>>, TError = unknown>(
  id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPartnerById>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getPartnerById>>,
           TError,
           Awaited<ReturnType<typeof getPartnerById>>
         > , 'initialData'
-      >, axios?: AxiosRequestConfig}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetPartnerById<TData = Awaited<ReturnType<typeof getPartnerById>>, TError = AxiosError<unknown>>(
- id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPartnerById>>, TError, TData>>, axios?: AxiosRequestConfig}
+export function useGetPartnerById<TData = Awaited<ReturnType<typeof getPartnerById>>, TError = unknown>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPartnerById>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useGetPartnerById<TData = Awaited<ReturnType<typeof getPartnerById>>, TError = AxiosError<unknown>>(
- id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPartnerById>>, TError, TData>>, axios?: AxiosRequestConfig}
+export function useGetPartnerById<TData = Awaited<ReturnType<typeof getPartnerById>>, TError = unknown>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPartnerById>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -125,15 +123,18 @@ export function useGetPartnerById<TData = Awaited<ReturnType<typeof getPartnerBy
 
 export const updatePartner = (
     id: number,
-    partnerRequest: PartnerRequest, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<ApiResponsePartnerResponse>> => {
+    partnerRequest: PartnerRequest,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
 
 
-    return axios.put(
-      `/api/v1/partners/${id}`,
-      partnerRequest,options
-    );
-  }
+      return customInstance<ApiResponsePartnerResponse>(
+      {url: `/api/v1/partners/${id}`, method: 'PUT',
+      headers: {'Content-Type': 'application/json', },
+      data: partnerRequest, signal
+    },
+      options);
+    }
 
 
 
@@ -146,17 +147,17 @@ export const getUpdatePartnerQueryKey = (id: number,
     }
 
 
-export const getUpdatePartnerQueryOptions = <TData = Awaited<ReturnType<typeof updatePartner>>, TError = AxiosError<unknown>>(id: number,
-    partnerRequest: PartnerRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof updatePartner>>, TError, TData>>, axios?: AxiosRequestConfig}
+export const getUpdatePartnerQueryOptions = <TData = Awaited<ReturnType<typeof updatePartner>>, TError = unknown>(id: number,
+    partnerRequest: PartnerRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof updatePartner>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
-const {query: queryOptions, axios: axiosOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getUpdatePartnerQueryKey(id,partnerRequest);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof updatePartner>>> = ({ signal }) => updatePartner(id,partnerRequest, { signal, ...axiosOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof updatePartner>>> = ({ signal }) => updatePartner(id,partnerRequest, requestOptions, signal);
 
 
 
@@ -166,10 +167,10 @@ const {query: queryOptions, axios: axiosOptions} = options ?? {};
 }
 
 export type UpdatePartnerQueryResult = NonNullable<Awaited<ReturnType<typeof updatePartner>>>
-export type UpdatePartnerQueryError = AxiosError<unknown>
+export type UpdatePartnerQueryError = unknown
 
 
-export function useUpdatePartner<TData = Awaited<ReturnType<typeof updatePartner>>, TError = AxiosError<unknown>>(
+export function useUpdatePartner<TData = Awaited<ReturnType<typeof updatePartner>>, TError = unknown>(
  id: number,
     partnerRequest: PartnerRequest, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof updatePartner>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
@@ -177,10 +178,10 @@ export function useUpdatePartner<TData = Awaited<ReturnType<typeof updatePartner
           TError,
           Awaited<ReturnType<typeof updatePartner>>
         > , 'initialData'
-      >, axios?: AxiosRequestConfig}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useUpdatePartner<TData = Awaited<ReturnType<typeof updatePartner>>, TError = AxiosError<unknown>>(
+export function useUpdatePartner<TData = Awaited<ReturnType<typeof updatePartner>>, TError = unknown>(
  id: number,
     partnerRequest: PartnerRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof updatePartner>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
@@ -188,18 +189,18 @@ export function useUpdatePartner<TData = Awaited<ReturnType<typeof updatePartner
           TError,
           Awaited<ReturnType<typeof updatePartner>>
         > , 'initialData'
-      >, axios?: AxiosRequestConfig}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useUpdatePartner<TData = Awaited<ReturnType<typeof updatePartner>>, TError = AxiosError<unknown>>(
+export function useUpdatePartner<TData = Awaited<ReturnType<typeof updatePartner>>, TError = unknown>(
  id: number,
-    partnerRequest: PartnerRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof updatePartner>>, TError, TData>>, axios?: AxiosRequestConfig}
+    partnerRequest: PartnerRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof updatePartner>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useUpdatePartner<TData = Awaited<ReturnType<typeof updatePartner>>, TError = AxiosError<unknown>>(
+export function useUpdatePartner<TData = Awaited<ReturnType<typeof updatePartner>>, TError = unknown>(
  id: number,
-    partnerRequest: PartnerRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof updatePartner>>, TError, TData>>, axios?: AxiosRequestConfig}
+    partnerRequest: PartnerRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof updatePartner>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -216,14 +217,16 @@ export function useUpdatePartner<TData = Awaited<ReturnType<typeof updatePartner
 
 
 export const deletePartner = (
-    id: number, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<ApiResponseVoid>> => {
+    id: number,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
 
 
-    return axios.delete(
-      `/api/v1/partners/${id}`,options
-    );
-  }
+      return customInstance<ApiResponseVoid>(
+      {url: `/api/v1/partners/${id}`, method: 'DELETE', signal
+    },
+      options);
+    }
 
 
 
@@ -235,16 +238,16 @@ export const getDeletePartnerQueryKey = (id: number,) => {
     }
 
 
-export const getDeletePartnerQueryOptions = <TData = Awaited<ReturnType<typeof deletePartner>>, TError = AxiosError<unknown>>(id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof deletePartner>>, TError, TData>>, axios?: AxiosRequestConfig}
+export const getDeletePartnerQueryOptions = <TData = Awaited<ReturnType<typeof deletePartner>>, TError = unknown>(id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof deletePartner>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
-const {query: queryOptions, axios: axiosOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getDeletePartnerQueryKey(id);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof deletePartner>>> = ({ signal }) => deletePartner(id, { signal, ...axiosOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof deletePartner>>> = ({ signal }) => deletePartner(id, requestOptions, signal);
 
 
 
@@ -254,36 +257,36 @@ const {query: queryOptions, axios: axiosOptions} = options ?? {};
 }
 
 export type DeletePartnerQueryResult = NonNullable<Awaited<ReturnType<typeof deletePartner>>>
-export type DeletePartnerQueryError = AxiosError<unknown>
+export type DeletePartnerQueryError = unknown
 
 
-export function useDeletePartner<TData = Awaited<ReturnType<typeof deletePartner>>, TError = AxiosError<unknown>>(
+export function useDeletePartner<TData = Awaited<ReturnType<typeof deletePartner>>, TError = unknown>(
  id: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof deletePartner>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof deletePartner>>,
           TError,
           Awaited<ReturnType<typeof deletePartner>>
         > , 'initialData'
-      >, axios?: AxiosRequestConfig}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useDeletePartner<TData = Awaited<ReturnType<typeof deletePartner>>, TError = AxiosError<unknown>>(
+export function useDeletePartner<TData = Awaited<ReturnType<typeof deletePartner>>, TError = unknown>(
  id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof deletePartner>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof deletePartner>>,
           TError,
           Awaited<ReturnType<typeof deletePartner>>
         > , 'initialData'
-      >, axios?: AxiosRequestConfig}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useDeletePartner<TData = Awaited<ReturnType<typeof deletePartner>>, TError = AxiosError<unknown>>(
- id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof deletePartner>>, TError, TData>>, axios?: AxiosRequestConfig}
+export function useDeletePartner<TData = Awaited<ReturnType<typeof deletePartner>>, TError = unknown>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof deletePartner>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useDeletePartner<TData = Awaited<ReturnType<typeof deletePartner>>, TError = AxiosError<unknown>>(
- id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof deletePartner>>, TError, TData>>, axios?: AxiosRequestConfig}
+export function useDeletePartner<TData = Awaited<ReturnType<typeof deletePartner>>, TError = unknown>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof deletePartner>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -300,16 +303,17 @@ export function useDeletePartner<TData = Awaited<ReturnType<typeof deletePartner
 
 
 export const getAllPartners = (
-    params: GetAllPartnersParams, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<ApiResponsePagePartnerResponse>> => {
+    params: GetAllPartnersParams,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
 
 
-    return axios.get(
-      `/api/v1/partners`,{
-    ...options,
-        params: {...params, ...options?.params},}
-    );
-  }
+      return customInstance<ApiResponsePagePartnerResponse>(
+      {url: `/api/v1/partners`, method: 'GET',
+        params, signal
+    },
+      options);
+    }
 
 
 
@@ -321,16 +325,16 @@ export const getGetAllPartnersQueryKey = (params?: GetAllPartnersParams,) => {
     }
 
 
-export const getGetAllPartnersQueryOptions = <TData = Awaited<ReturnType<typeof getAllPartners>>, TError = AxiosError<unknown>>(params: GetAllPartnersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAllPartners>>, TError, TData>>, axios?: AxiosRequestConfig}
+export const getGetAllPartnersQueryOptions = <TData = Awaited<ReturnType<typeof getAllPartners>>, TError = unknown>(params: GetAllPartnersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAllPartners>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
-const {query: queryOptions, axios: axiosOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetAllPartnersQueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAllPartners>>> = ({ signal }) => getAllPartners(params, { signal, ...axiosOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAllPartners>>> = ({ signal }) => getAllPartners(params, requestOptions, signal);
 
 
 
@@ -340,36 +344,36 @@ const {query: queryOptions, axios: axiosOptions} = options ?? {};
 }
 
 export type GetAllPartnersQueryResult = NonNullable<Awaited<ReturnType<typeof getAllPartners>>>
-export type GetAllPartnersQueryError = AxiosError<unknown>
+export type GetAllPartnersQueryError = unknown
 
 
-export function useGetAllPartners<TData = Awaited<ReturnType<typeof getAllPartners>>, TError = AxiosError<unknown>>(
+export function useGetAllPartners<TData = Awaited<ReturnType<typeof getAllPartners>>, TError = unknown>(
  params: GetAllPartnersParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAllPartners>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getAllPartners>>,
           TError,
           Awaited<ReturnType<typeof getAllPartners>>
         > , 'initialData'
-      >, axios?: AxiosRequestConfig}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetAllPartners<TData = Awaited<ReturnType<typeof getAllPartners>>, TError = AxiosError<unknown>>(
+export function useGetAllPartners<TData = Awaited<ReturnType<typeof getAllPartners>>, TError = unknown>(
  params: GetAllPartnersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAllPartners>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getAllPartners>>,
           TError,
           Awaited<ReturnType<typeof getAllPartners>>
         > , 'initialData'
-      >, axios?: AxiosRequestConfig}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetAllPartners<TData = Awaited<ReturnType<typeof getAllPartners>>, TError = AxiosError<unknown>>(
- params: GetAllPartnersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAllPartners>>, TError, TData>>, axios?: AxiosRequestConfig}
+export function useGetAllPartners<TData = Awaited<ReturnType<typeof getAllPartners>>, TError = unknown>(
+ params: GetAllPartnersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAllPartners>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useGetAllPartners<TData = Awaited<ReturnType<typeof getAllPartners>>, TError = AxiosError<unknown>>(
- params: GetAllPartnersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAllPartners>>, TError, TData>>, axios?: AxiosRequestConfig}
+export function useGetAllPartners<TData = Awaited<ReturnType<typeof getAllPartners>>, TError = unknown>(
+ params: GetAllPartnersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAllPartners>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -386,15 +390,18 @@ export function useGetAllPartners<TData = Awaited<ReturnType<typeof getAllPartne
 
 
 export const createPartner = (
-    partnerRequest: PartnerRequest, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<ApiResponsePartnerResponse>> => {
+    partnerRequest: PartnerRequest,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
 
 
-    return axios.post(
-      `/api/v1/partners`,
-      partnerRequest,options
-    );
-  }
+      return customInstance<ApiResponsePartnerResponse>(
+      {url: `/api/v1/partners`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: partnerRequest, signal
+    },
+      options);
+    }
 
 
 
@@ -406,16 +413,16 @@ export const getCreatePartnerQueryKey = (partnerRequest?: PartnerRequest,) => {
     }
 
 
-export const getCreatePartnerQueryOptions = <TData = Awaited<ReturnType<typeof createPartner>>, TError = AxiosError<unknown>>(partnerRequest: PartnerRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof createPartner>>, TError, TData>>, axios?: AxiosRequestConfig}
+export const getCreatePartnerQueryOptions = <TData = Awaited<ReturnType<typeof createPartner>>, TError = unknown>(partnerRequest: PartnerRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof createPartner>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
-const {query: queryOptions, axios: axiosOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getCreatePartnerQueryKey(partnerRequest);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof createPartner>>> = ({ signal }) => createPartner(partnerRequest, { signal, ...axiosOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof createPartner>>> = ({ signal }) => createPartner(partnerRequest, requestOptions, signal);
 
 
 
@@ -425,36 +432,36 @@ const {query: queryOptions, axios: axiosOptions} = options ?? {};
 }
 
 export type CreatePartnerQueryResult = NonNullable<Awaited<ReturnType<typeof createPartner>>>
-export type CreatePartnerQueryError = AxiosError<unknown>
+export type CreatePartnerQueryError = unknown
 
 
-export function useCreatePartner<TData = Awaited<ReturnType<typeof createPartner>>, TError = AxiosError<unknown>>(
+export function useCreatePartner<TData = Awaited<ReturnType<typeof createPartner>>, TError = unknown>(
  partnerRequest: PartnerRequest, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof createPartner>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof createPartner>>,
           TError,
           Awaited<ReturnType<typeof createPartner>>
         > , 'initialData'
-      >, axios?: AxiosRequestConfig}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useCreatePartner<TData = Awaited<ReturnType<typeof createPartner>>, TError = AxiosError<unknown>>(
+export function useCreatePartner<TData = Awaited<ReturnType<typeof createPartner>>, TError = unknown>(
  partnerRequest: PartnerRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof createPartner>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof createPartner>>,
           TError,
           Awaited<ReturnType<typeof createPartner>>
         > , 'initialData'
-      >, axios?: AxiosRequestConfig}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useCreatePartner<TData = Awaited<ReturnType<typeof createPartner>>, TError = AxiosError<unknown>>(
- partnerRequest: PartnerRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof createPartner>>, TError, TData>>, axios?: AxiosRequestConfig}
+export function useCreatePartner<TData = Awaited<ReturnType<typeof createPartner>>, TError = unknown>(
+ partnerRequest: PartnerRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof createPartner>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useCreatePartner<TData = Awaited<ReturnType<typeof createPartner>>, TError = AxiosError<unknown>>(
- partnerRequest: PartnerRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof createPartner>>, TError, TData>>, axios?: AxiosRequestConfig}
+export function useCreatePartner<TData = Awaited<ReturnType<typeof createPartner>>, TError = unknown>(
+ partnerRequest: PartnerRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof createPartner>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 

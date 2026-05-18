@@ -20,13 +20,6 @@ import type {
   UseQueryResult
 } from '@tanstack/react-query';
 
-import axios from 'axios';
-import type {
-  AxiosError,
-  AxiosRequestConfig,
-  AxiosResponse
-} from 'axios';
-
 import type {
   ApiResponsePageWarehouseResponse,
   ApiResponseVoid,
@@ -35,19 +28,24 @@ import type {
   WarehouseRequest
 } from '../model';
 
+import { customInstance } from '../../api-client';
 
+
+type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 
 export const getWarehouseById = (
-    id: number, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<ApiResponseWarehouseResponse>> => {
+    id: number,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
 
 
-    return axios.get(
-      `/api/v1/warehouses/${id}`,options
-    );
-  }
+      return customInstance<ApiResponseWarehouseResponse>(
+      {url: `/api/v1/warehouses/${id}`, method: 'GET', signal
+    },
+      options);
+    }
 
 
 
@@ -59,16 +57,16 @@ export const getGetWarehouseByIdQueryKey = (id: number,) => {
     }
 
 
-export const getGetWarehouseByIdQueryOptions = <TData = Awaited<ReturnType<typeof getWarehouseById>>, TError = AxiosError<unknown>>(id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getWarehouseById>>, TError, TData>>, axios?: AxiosRequestConfig}
+export const getGetWarehouseByIdQueryOptions = <TData = Awaited<ReturnType<typeof getWarehouseById>>, TError = unknown>(id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getWarehouseById>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
-const {query: queryOptions, axios: axiosOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetWarehouseByIdQueryKey(id);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getWarehouseById>>> = ({ signal }) => getWarehouseById(id, { signal, ...axiosOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getWarehouseById>>> = ({ signal }) => getWarehouseById(id, requestOptions, signal);
 
 
 
@@ -78,36 +76,36 @@ const {query: queryOptions, axios: axiosOptions} = options ?? {};
 }
 
 export type GetWarehouseByIdQueryResult = NonNullable<Awaited<ReturnType<typeof getWarehouseById>>>
-export type GetWarehouseByIdQueryError = AxiosError<unknown>
+export type GetWarehouseByIdQueryError = unknown
 
 
-export function useGetWarehouseById<TData = Awaited<ReturnType<typeof getWarehouseById>>, TError = AxiosError<unknown>>(
+export function useGetWarehouseById<TData = Awaited<ReturnType<typeof getWarehouseById>>, TError = unknown>(
  id: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getWarehouseById>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getWarehouseById>>,
           TError,
           Awaited<ReturnType<typeof getWarehouseById>>
         > , 'initialData'
-      >, axios?: AxiosRequestConfig}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetWarehouseById<TData = Awaited<ReturnType<typeof getWarehouseById>>, TError = AxiosError<unknown>>(
+export function useGetWarehouseById<TData = Awaited<ReturnType<typeof getWarehouseById>>, TError = unknown>(
  id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getWarehouseById>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getWarehouseById>>,
           TError,
           Awaited<ReturnType<typeof getWarehouseById>>
         > , 'initialData'
-      >, axios?: AxiosRequestConfig}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetWarehouseById<TData = Awaited<ReturnType<typeof getWarehouseById>>, TError = AxiosError<unknown>>(
- id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getWarehouseById>>, TError, TData>>, axios?: AxiosRequestConfig}
+export function useGetWarehouseById<TData = Awaited<ReturnType<typeof getWarehouseById>>, TError = unknown>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getWarehouseById>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useGetWarehouseById<TData = Awaited<ReturnType<typeof getWarehouseById>>, TError = AxiosError<unknown>>(
- id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getWarehouseById>>, TError, TData>>, axios?: AxiosRequestConfig}
+export function useGetWarehouseById<TData = Awaited<ReturnType<typeof getWarehouseById>>, TError = unknown>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getWarehouseById>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -125,15 +123,18 @@ export function useGetWarehouseById<TData = Awaited<ReturnType<typeof getWarehou
 
 export const updateWarehouse = (
     id: number,
-    warehouseRequest: WarehouseRequest, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<ApiResponseWarehouseResponse>> => {
+    warehouseRequest: WarehouseRequest,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
 
 
-    return axios.put(
-      `/api/v1/warehouses/${id}`,
-      warehouseRequest,options
-    );
-  }
+      return customInstance<ApiResponseWarehouseResponse>(
+      {url: `/api/v1/warehouses/${id}`, method: 'PUT',
+      headers: {'Content-Type': 'application/json', },
+      data: warehouseRequest, signal
+    },
+      options);
+    }
 
 
 
@@ -146,17 +147,17 @@ export const getUpdateWarehouseQueryKey = (id: number,
     }
 
 
-export const getUpdateWarehouseQueryOptions = <TData = Awaited<ReturnType<typeof updateWarehouse>>, TError = AxiosError<unknown>>(id: number,
-    warehouseRequest: WarehouseRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof updateWarehouse>>, TError, TData>>, axios?: AxiosRequestConfig}
+export const getUpdateWarehouseQueryOptions = <TData = Awaited<ReturnType<typeof updateWarehouse>>, TError = unknown>(id: number,
+    warehouseRequest: WarehouseRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof updateWarehouse>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
-const {query: queryOptions, axios: axiosOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getUpdateWarehouseQueryKey(id,warehouseRequest);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof updateWarehouse>>> = ({ signal }) => updateWarehouse(id,warehouseRequest, { signal, ...axiosOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof updateWarehouse>>> = ({ signal }) => updateWarehouse(id,warehouseRequest, requestOptions, signal);
 
 
 
@@ -166,10 +167,10 @@ const {query: queryOptions, axios: axiosOptions} = options ?? {};
 }
 
 export type UpdateWarehouseQueryResult = NonNullable<Awaited<ReturnType<typeof updateWarehouse>>>
-export type UpdateWarehouseQueryError = AxiosError<unknown>
+export type UpdateWarehouseQueryError = unknown
 
 
-export function useUpdateWarehouse<TData = Awaited<ReturnType<typeof updateWarehouse>>, TError = AxiosError<unknown>>(
+export function useUpdateWarehouse<TData = Awaited<ReturnType<typeof updateWarehouse>>, TError = unknown>(
  id: number,
     warehouseRequest: WarehouseRequest, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof updateWarehouse>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
@@ -177,10 +178,10 @@ export function useUpdateWarehouse<TData = Awaited<ReturnType<typeof updateWareh
           TError,
           Awaited<ReturnType<typeof updateWarehouse>>
         > , 'initialData'
-      >, axios?: AxiosRequestConfig}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useUpdateWarehouse<TData = Awaited<ReturnType<typeof updateWarehouse>>, TError = AxiosError<unknown>>(
+export function useUpdateWarehouse<TData = Awaited<ReturnType<typeof updateWarehouse>>, TError = unknown>(
  id: number,
     warehouseRequest: WarehouseRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof updateWarehouse>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
@@ -188,18 +189,18 @@ export function useUpdateWarehouse<TData = Awaited<ReturnType<typeof updateWareh
           TError,
           Awaited<ReturnType<typeof updateWarehouse>>
         > , 'initialData'
-      >, axios?: AxiosRequestConfig}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useUpdateWarehouse<TData = Awaited<ReturnType<typeof updateWarehouse>>, TError = AxiosError<unknown>>(
+export function useUpdateWarehouse<TData = Awaited<ReturnType<typeof updateWarehouse>>, TError = unknown>(
  id: number,
-    warehouseRequest: WarehouseRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof updateWarehouse>>, TError, TData>>, axios?: AxiosRequestConfig}
+    warehouseRequest: WarehouseRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof updateWarehouse>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useUpdateWarehouse<TData = Awaited<ReturnType<typeof updateWarehouse>>, TError = AxiosError<unknown>>(
+export function useUpdateWarehouse<TData = Awaited<ReturnType<typeof updateWarehouse>>, TError = unknown>(
  id: number,
-    warehouseRequest: WarehouseRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof updateWarehouse>>, TError, TData>>, axios?: AxiosRequestConfig}
+    warehouseRequest: WarehouseRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof updateWarehouse>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -216,16 +217,17 @@ export function useUpdateWarehouse<TData = Awaited<ReturnType<typeof updateWareh
 
 
 export const getAllWarehouses = (
-    params?: GetAllWarehousesParams, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<ApiResponsePageWarehouseResponse>> => {
+    params?: GetAllWarehousesParams,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
 
 
-    return axios.get(
-      `/api/v1/warehouses`,{
-    ...options,
-        params: {...params, ...options?.params},}
-    );
-  }
+      return customInstance<ApiResponsePageWarehouseResponse>(
+      {url: `/api/v1/warehouses`, method: 'GET',
+        params, signal
+    },
+      options);
+    }
 
 
 
@@ -237,16 +239,16 @@ export const getGetAllWarehousesQueryKey = (params?: GetAllWarehousesParams,) =>
     }
 
 
-export const getGetAllWarehousesQueryOptions = <TData = Awaited<ReturnType<typeof getAllWarehouses>>, TError = AxiosError<unknown>>(params?: GetAllWarehousesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAllWarehouses>>, TError, TData>>, axios?: AxiosRequestConfig}
+export const getGetAllWarehousesQueryOptions = <TData = Awaited<ReturnType<typeof getAllWarehouses>>, TError = unknown>(params?: GetAllWarehousesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAllWarehouses>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
-const {query: queryOptions, axios: axiosOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetAllWarehousesQueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAllWarehouses>>> = ({ signal }) => getAllWarehouses(params, { signal, ...axiosOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAllWarehouses>>> = ({ signal }) => getAllWarehouses(params, requestOptions, signal);
 
 
 
@@ -256,36 +258,36 @@ const {query: queryOptions, axios: axiosOptions} = options ?? {};
 }
 
 export type GetAllWarehousesQueryResult = NonNullable<Awaited<ReturnType<typeof getAllWarehouses>>>
-export type GetAllWarehousesQueryError = AxiosError<unknown>
+export type GetAllWarehousesQueryError = unknown
 
 
-export function useGetAllWarehouses<TData = Awaited<ReturnType<typeof getAllWarehouses>>, TError = AxiosError<unknown>>(
+export function useGetAllWarehouses<TData = Awaited<ReturnType<typeof getAllWarehouses>>, TError = unknown>(
  params: undefined |  GetAllWarehousesParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAllWarehouses>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getAllWarehouses>>,
           TError,
           Awaited<ReturnType<typeof getAllWarehouses>>
         > , 'initialData'
-      >, axios?: AxiosRequestConfig}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetAllWarehouses<TData = Awaited<ReturnType<typeof getAllWarehouses>>, TError = AxiosError<unknown>>(
+export function useGetAllWarehouses<TData = Awaited<ReturnType<typeof getAllWarehouses>>, TError = unknown>(
  params?: GetAllWarehousesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAllWarehouses>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getAllWarehouses>>,
           TError,
           Awaited<ReturnType<typeof getAllWarehouses>>
         > , 'initialData'
-      >, axios?: AxiosRequestConfig}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetAllWarehouses<TData = Awaited<ReturnType<typeof getAllWarehouses>>, TError = AxiosError<unknown>>(
- params?: GetAllWarehousesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAllWarehouses>>, TError, TData>>, axios?: AxiosRequestConfig}
+export function useGetAllWarehouses<TData = Awaited<ReturnType<typeof getAllWarehouses>>, TError = unknown>(
+ params?: GetAllWarehousesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAllWarehouses>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useGetAllWarehouses<TData = Awaited<ReturnType<typeof getAllWarehouses>>, TError = AxiosError<unknown>>(
- params?: GetAllWarehousesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAllWarehouses>>, TError, TData>>, axios?: AxiosRequestConfig}
+export function useGetAllWarehouses<TData = Awaited<ReturnType<typeof getAllWarehouses>>, TError = unknown>(
+ params?: GetAllWarehousesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAllWarehouses>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -302,15 +304,18 @@ export function useGetAllWarehouses<TData = Awaited<ReturnType<typeof getAllWare
 
 
 export const createWarehouse = (
-    warehouseRequest: WarehouseRequest, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<ApiResponseWarehouseResponse>> => {
+    warehouseRequest: WarehouseRequest,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
 
 
-    return axios.post(
-      `/api/v1/warehouses`,
-      warehouseRequest,options
-    );
-  }
+      return customInstance<ApiResponseWarehouseResponse>(
+      {url: `/api/v1/warehouses`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: warehouseRequest, signal
+    },
+      options);
+    }
 
 
 
@@ -322,16 +327,16 @@ export const getCreateWarehouseQueryKey = (warehouseRequest?: WarehouseRequest,)
     }
 
 
-export const getCreateWarehouseQueryOptions = <TData = Awaited<ReturnType<typeof createWarehouse>>, TError = AxiosError<unknown>>(warehouseRequest: WarehouseRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof createWarehouse>>, TError, TData>>, axios?: AxiosRequestConfig}
+export const getCreateWarehouseQueryOptions = <TData = Awaited<ReturnType<typeof createWarehouse>>, TError = unknown>(warehouseRequest: WarehouseRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof createWarehouse>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
-const {query: queryOptions, axios: axiosOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getCreateWarehouseQueryKey(warehouseRequest);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof createWarehouse>>> = ({ signal }) => createWarehouse(warehouseRequest, { signal, ...axiosOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof createWarehouse>>> = ({ signal }) => createWarehouse(warehouseRequest, requestOptions, signal);
 
 
 
@@ -341,36 +346,36 @@ const {query: queryOptions, axios: axiosOptions} = options ?? {};
 }
 
 export type CreateWarehouseQueryResult = NonNullable<Awaited<ReturnType<typeof createWarehouse>>>
-export type CreateWarehouseQueryError = AxiosError<unknown>
+export type CreateWarehouseQueryError = unknown
 
 
-export function useCreateWarehouse<TData = Awaited<ReturnType<typeof createWarehouse>>, TError = AxiosError<unknown>>(
+export function useCreateWarehouse<TData = Awaited<ReturnType<typeof createWarehouse>>, TError = unknown>(
  warehouseRequest: WarehouseRequest, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof createWarehouse>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof createWarehouse>>,
           TError,
           Awaited<ReturnType<typeof createWarehouse>>
         > , 'initialData'
-      >, axios?: AxiosRequestConfig}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useCreateWarehouse<TData = Awaited<ReturnType<typeof createWarehouse>>, TError = AxiosError<unknown>>(
+export function useCreateWarehouse<TData = Awaited<ReturnType<typeof createWarehouse>>, TError = unknown>(
  warehouseRequest: WarehouseRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof createWarehouse>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof createWarehouse>>,
           TError,
           Awaited<ReturnType<typeof createWarehouse>>
         > , 'initialData'
-      >, axios?: AxiosRequestConfig}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useCreateWarehouse<TData = Awaited<ReturnType<typeof createWarehouse>>, TError = AxiosError<unknown>>(
- warehouseRequest: WarehouseRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof createWarehouse>>, TError, TData>>, axios?: AxiosRequestConfig}
+export function useCreateWarehouse<TData = Awaited<ReturnType<typeof createWarehouse>>, TError = unknown>(
+ warehouseRequest: WarehouseRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof createWarehouse>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useCreateWarehouse<TData = Awaited<ReturnType<typeof createWarehouse>>, TError = AxiosError<unknown>>(
- warehouseRequest: WarehouseRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof createWarehouse>>, TError, TData>>, axios?: AxiosRequestConfig}
+export function useCreateWarehouse<TData = Awaited<ReturnType<typeof createWarehouse>>, TError = unknown>(
+ warehouseRequest: WarehouseRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof createWarehouse>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -387,15 +392,16 @@ export function useCreateWarehouse<TData = Awaited<ReturnType<typeof createWareh
 
 
 export const disableWarehouse = (
-    code: string, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<ApiResponseVoid>> => {
+    code: string,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
 
 
-    return axios.patch(
-      `/api/v1/warehouses/${code}/disable`,
-      undefined,options
-    );
-  }
+      return customInstance<ApiResponseVoid>(
+      {url: `/api/v1/warehouses/${code}/disable`, method: 'PATCH', signal
+    },
+      options);
+    }
 
 
 
@@ -407,16 +413,16 @@ export const getDisableWarehouseQueryKey = (code: string,) => {
     }
 
 
-export const getDisableWarehouseQueryOptions = <TData = Awaited<ReturnType<typeof disableWarehouse>>, TError = AxiosError<unknown>>(code: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof disableWarehouse>>, TError, TData>>, axios?: AxiosRequestConfig}
+export const getDisableWarehouseQueryOptions = <TData = Awaited<ReturnType<typeof disableWarehouse>>, TError = unknown>(code: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof disableWarehouse>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
-const {query: queryOptions, axios: axiosOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getDisableWarehouseQueryKey(code);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof disableWarehouse>>> = ({ signal }) => disableWarehouse(code, { signal, ...axiosOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof disableWarehouse>>> = ({ signal }) => disableWarehouse(code, requestOptions, signal);
 
 
 
@@ -426,36 +432,36 @@ const {query: queryOptions, axios: axiosOptions} = options ?? {};
 }
 
 export type DisableWarehouseQueryResult = NonNullable<Awaited<ReturnType<typeof disableWarehouse>>>
-export type DisableWarehouseQueryError = AxiosError<unknown>
+export type DisableWarehouseQueryError = unknown
 
 
-export function useDisableWarehouse<TData = Awaited<ReturnType<typeof disableWarehouse>>, TError = AxiosError<unknown>>(
+export function useDisableWarehouse<TData = Awaited<ReturnType<typeof disableWarehouse>>, TError = unknown>(
  code: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof disableWarehouse>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof disableWarehouse>>,
           TError,
           Awaited<ReturnType<typeof disableWarehouse>>
         > , 'initialData'
-      >, axios?: AxiosRequestConfig}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useDisableWarehouse<TData = Awaited<ReturnType<typeof disableWarehouse>>, TError = AxiosError<unknown>>(
+export function useDisableWarehouse<TData = Awaited<ReturnType<typeof disableWarehouse>>, TError = unknown>(
  code: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof disableWarehouse>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof disableWarehouse>>,
           TError,
           Awaited<ReturnType<typeof disableWarehouse>>
         > , 'initialData'
-      >, axios?: AxiosRequestConfig}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useDisableWarehouse<TData = Awaited<ReturnType<typeof disableWarehouse>>, TError = AxiosError<unknown>>(
- code: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof disableWarehouse>>, TError, TData>>, axios?: AxiosRequestConfig}
+export function useDisableWarehouse<TData = Awaited<ReturnType<typeof disableWarehouse>>, TError = unknown>(
+ code: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof disableWarehouse>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useDisableWarehouse<TData = Awaited<ReturnType<typeof disableWarehouse>>, TError = AxiosError<unknown>>(
- code: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof disableWarehouse>>, TError, TData>>, axios?: AxiosRequestConfig}
+export function useDisableWarehouse<TData = Awaited<ReturnType<typeof disableWarehouse>>, TError = unknown>(
+ code: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof disableWarehouse>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -472,14 +478,16 @@ export function useDisableWarehouse<TData = Awaited<ReturnType<typeof disableWar
 
 
 export const deleteWarehouse = (
-    code: string, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<ApiResponseVoid>> => {
+    code: string,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
 
 
-    return axios.delete(
-      `/api/v1/warehouses/${code}`,options
-    );
-  }
+      return customInstance<ApiResponseVoid>(
+      {url: `/api/v1/warehouses/${code}`, method: 'DELETE', signal
+    },
+      options);
+    }
 
 
 
@@ -491,16 +499,16 @@ export const getDeleteWarehouseQueryKey = (code: string,) => {
     }
 
 
-export const getDeleteWarehouseQueryOptions = <TData = Awaited<ReturnType<typeof deleteWarehouse>>, TError = AxiosError<unknown>>(code: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof deleteWarehouse>>, TError, TData>>, axios?: AxiosRequestConfig}
+export const getDeleteWarehouseQueryOptions = <TData = Awaited<ReturnType<typeof deleteWarehouse>>, TError = unknown>(code: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof deleteWarehouse>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
-const {query: queryOptions, axios: axiosOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getDeleteWarehouseQueryKey(code);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof deleteWarehouse>>> = ({ signal }) => deleteWarehouse(code, { signal, ...axiosOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof deleteWarehouse>>> = ({ signal }) => deleteWarehouse(code, requestOptions, signal);
 
 
 
@@ -510,36 +518,36 @@ const {query: queryOptions, axios: axiosOptions} = options ?? {};
 }
 
 export type DeleteWarehouseQueryResult = NonNullable<Awaited<ReturnType<typeof deleteWarehouse>>>
-export type DeleteWarehouseQueryError = AxiosError<unknown>
+export type DeleteWarehouseQueryError = unknown
 
 
-export function useDeleteWarehouse<TData = Awaited<ReturnType<typeof deleteWarehouse>>, TError = AxiosError<unknown>>(
+export function useDeleteWarehouse<TData = Awaited<ReturnType<typeof deleteWarehouse>>, TError = unknown>(
  code: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof deleteWarehouse>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof deleteWarehouse>>,
           TError,
           Awaited<ReturnType<typeof deleteWarehouse>>
         > , 'initialData'
-      >, axios?: AxiosRequestConfig}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useDeleteWarehouse<TData = Awaited<ReturnType<typeof deleteWarehouse>>, TError = AxiosError<unknown>>(
+export function useDeleteWarehouse<TData = Awaited<ReturnType<typeof deleteWarehouse>>, TError = unknown>(
  code: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof deleteWarehouse>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof deleteWarehouse>>,
           TError,
           Awaited<ReturnType<typeof deleteWarehouse>>
         > , 'initialData'
-      >, axios?: AxiosRequestConfig}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useDeleteWarehouse<TData = Awaited<ReturnType<typeof deleteWarehouse>>, TError = AxiosError<unknown>>(
- code: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof deleteWarehouse>>, TError, TData>>, axios?: AxiosRequestConfig}
+export function useDeleteWarehouse<TData = Awaited<ReturnType<typeof deleteWarehouse>>, TError = unknown>(
+ code: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof deleteWarehouse>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useDeleteWarehouse<TData = Awaited<ReturnType<typeof deleteWarehouse>>, TError = AxiosError<unknown>>(
- code: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof deleteWarehouse>>, TError, TData>>, axios?: AxiosRequestConfig}
+export function useDeleteWarehouse<TData = Awaited<ReturnType<typeof deleteWarehouse>>, TError = unknown>(
+ code: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof deleteWarehouse>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 

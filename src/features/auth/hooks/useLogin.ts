@@ -12,15 +12,14 @@ export function useLogin() {
   return useMutation<LoginResponseData, Error, LoginMutationParams>({
     mutationFn: async ({ email, password }) => {
       try {
-        const response = await authApi.login({ username: email, password });
-        const result = response.data;
+        const result: any = await authApi.login({ username: email, password });
         console.log(">>> API Response:", result);
         if (result.code && result.code !== 200) {
           throw new Error(result.message || "Đăng nhập thất bại");
         }
 
-        const authData = result.data;
-        if (!authData?.token) {
+        const authData: any = result.data;
+        if (!authData?.accessToken) {
           throw new Error("Đăng nhập thất bại: thiếu token trả về");
         }
 
@@ -32,7 +31,8 @@ export function useLogin() {
             role: "USER",
           },
           tokens: {
-            accessToken: authData.token,
+            accessToken: authData.accessToken,
+            refreshToken: authData.refreshToken,
           },
         };
       } catch (error: unknown) {
@@ -46,9 +46,9 @@ export function useLogin() {
         const { accessToken, refreshToken } = data.tokens;
         const maxAge = variables.remember ? 30 * 24 * 60 * 60 : 7 * 24 * 60 * 60;
 
-        document.cookie = `token=${accessToken}; path=/; max-age=${maxAge}; SameSite=Lax`;
+        document.cookie = `accessToken=${accessToken}; path=/; max-age=${maxAge}; SameSite=Strict`;
         if (refreshToken) {
-          document.cookie = `refreshToken=${refreshToken}; path=/; max-age=${maxAge}; SameSite=Lax`;
+          document.cookie = `refreshToken=${refreshToken}; path=/; max-age=${maxAge}; SameSite=Strict`;
         }
         console.log(">>> Hook: Đã lưu token vào cookie");
       }

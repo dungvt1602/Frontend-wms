@@ -13,6 +13,10 @@ export default defineConfig({
       mode: "tags-split",   // Chia các hàm gọi API thành các file riêng biệt dựa trên tags được định nghĩa trong OpenAPI Spec
       clean: true,
       override: {
+        mutator: {
+          path: "src/lib/api-client.ts",
+          name: "customInstance",
+        },
         query: {
           useQuery: true,
           useMutation: true,

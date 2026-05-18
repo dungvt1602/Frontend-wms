@@ -20,13 +20,6 @@ import type {
   UseQueryResult
 } from '@tanstack/react-query';
 
-import axios from 'axios';
-import type {
-  AxiosError,
-  AxiosRequestConfig,
-  AxiosResponse
-} from 'axios';
-
 import type {
   ApiResponseInventoryResponse,
   ApiResponseInventoryTransferResponse,
@@ -34,20 +27,26 @@ import type {
   InventoryTransferRequest
 } from '../model';
 
+import { customInstance } from '../../api-client';
 
+
+type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 
 export const transferStock = (
-    inventoryTransferRequest: InventoryTransferRequest, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<ApiResponseInventoryTransferResponse>> => {
+    inventoryTransferRequest: InventoryTransferRequest,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
 
 
-    return axios.post(
-      `/api/v1/inventory/transfer`,
-      inventoryTransferRequest,options
-    );
-  }
+      return customInstance<ApiResponseInventoryTransferResponse>(
+      {url: `/api/v1/inventory/transfer`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: inventoryTransferRequest, signal
+    },
+      options);
+    }
 
 
 
@@ -59,16 +58,16 @@ export const getTransferStockQueryKey = (inventoryTransferRequest?: InventoryTra
     }
 
 
-export const getTransferStockQueryOptions = <TData = Awaited<ReturnType<typeof transferStock>>, TError = AxiosError<unknown>>(inventoryTransferRequest: InventoryTransferRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof transferStock>>, TError, TData>>, axios?: AxiosRequestConfig}
+export const getTransferStockQueryOptions = <TData = Awaited<ReturnType<typeof transferStock>>, TError = unknown>(inventoryTransferRequest: InventoryTransferRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof transferStock>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
-const {query: queryOptions, axios: axiosOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getTransferStockQueryKey(inventoryTransferRequest);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof transferStock>>> = ({ signal }) => transferStock(inventoryTransferRequest, { signal, ...axiosOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof transferStock>>> = ({ signal }) => transferStock(inventoryTransferRequest, requestOptions, signal);
 
 
 
@@ -78,36 +77,36 @@ const {query: queryOptions, axios: axiosOptions} = options ?? {};
 }
 
 export type TransferStockQueryResult = NonNullable<Awaited<ReturnType<typeof transferStock>>>
-export type TransferStockQueryError = AxiosError<unknown>
+export type TransferStockQueryError = unknown
 
 
-export function useTransferStock<TData = Awaited<ReturnType<typeof transferStock>>, TError = AxiosError<unknown>>(
+export function useTransferStock<TData = Awaited<ReturnType<typeof transferStock>>, TError = unknown>(
  inventoryTransferRequest: InventoryTransferRequest, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof transferStock>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof transferStock>>,
           TError,
           Awaited<ReturnType<typeof transferStock>>
         > , 'initialData'
-      >, axios?: AxiosRequestConfig}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useTransferStock<TData = Awaited<ReturnType<typeof transferStock>>, TError = AxiosError<unknown>>(
+export function useTransferStock<TData = Awaited<ReturnType<typeof transferStock>>, TError = unknown>(
  inventoryTransferRequest: InventoryTransferRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof transferStock>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof transferStock>>,
           TError,
           Awaited<ReturnType<typeof transferStock>>
         > , 'initialData'
-      >, axios?: AxiosRequestConfig}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useTransferStock<TData = Awaited<ReturnType<typeof transferStock>>, TError = AxiosError<unknown>>(
- inventoryTransferRequest: InventoryTransferRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof transferStock>>, TError, TData>>, axios?: AxiosRequestConfig}
+export function useTransferStock<TData = Awaited<ReturnType<typeof transferStock>>, TError = unknown>(
+ inventoryTransferRequest: InventoryTransferRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof transferStock>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useTransferStock<TData = Awaited<ReturnType<typeof transferStock>>, TError = AxiosError<unknown>>(
- inventoryTransferRequest: InventoryTransferRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof transferStock>>, TError, TData>>, axios?: AxiosRequestConfig}
+export function useTransferStock<TData = Awaited<ReturnType<typeof transferStock>>, TError = unknown>(
+ inventoryTransferRequest: InventoryTransferRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof transferStock>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -124,15 +123,18 @@ export function useTransferStock<TData = Awaited<ReturnType<typeof transferStock
 
 
 export const addStock = (
-    inventoryRequest: InventoryRequest, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<ApiResponseInventoryResponse>> => {
+    inventoryRequest: InventoryRequest,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
 
 
-    return axios.post(
-      `/api/v1/inventory/add`,
-      inventoryRequest,options
-    );
-  }
+      return customInstance<ApiResponseInventoryResponse>(
+      {url: `/api/v1/inventory/add`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: inventoryRequest, signal
+    },
+      options);
+    }
 
 
 
@@ -144,16 +146,16 @@ export const getAddStockQueryKey = (inventoryRequest?: InventoryRequest,) => {
     }
 
 
-export const getAddStockQueryOptions = <TData = Awaited<ReturnType<typeof addStock>>, TError = AxiosError<unknown>>(inventoryRequest: InventoryRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof addStock>>, TError, TData>>, axios?: AxiosRequestConfig}
+export const getAddStockQueryOptions = <TData = Awaited<ReturnType<typeof addStock>>, TError = unknown>(inventoryRequest: InventoryRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof addStock>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
-const {query: queryOptions, axios: axiosOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getAddStockQueryKey(inventoryRequest);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof addStock>>> = ({ signal }) => addStock(inventoryRequest, { signal, ...axiosOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof addStock>>> = ({ signal }) => addStock(inventoryRequest, requestOptions, signal);
 
 
 
@@ -163,36 +165,36 @@ const {query: queryOptions, axios: axiosOptions} = options ?? {};
 }
 
 export type AddStockQueryResult = NonNullable<Awaited<ReturnType<typeof addStock>>>
-export type AddStockQueryError = AxiosError<unknown>
+export type AddStockQueryError = unknown
 
 
-export function useAddStock<TData = Awaited<ReturnType<typeof addStock>>, TError = AxiosError<unknown>>(
+export function useAddStock<TData = Awaited<ReturnType<typeof addStock>>, TError = unknown>(
  inventoryRequest: InventoryRequest, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof addStock>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof addStock>>,
           TError,
           Awaited<ReturnType<typeof addStock>>
         > , 'initialData'
-      >, axios?: AxiosRequestConfig}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useAddStock<TData = Awaited<ReturnType<typeof addStock>>, TError = AxiosError<unknown>>(
+export function useAddStock<TData = Awaited<ReturnType<typeof addStock>>, TError = unknown>(
  inventoryRequest: InventoryRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof addStock>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof addStock>>,
           TError,
           Awaited<ReturnType<typeof addStock>>
         > , 'initialData'
-      >, axios?: AxiosRequestConfig}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useAddStock<TData = Awaited<ReturnType<typeof addStock>>, TError = AxiosError<unknown>>(
- inventoryRequest: InventoryRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof addStock>>, TError, TData>>, axios?: AxiosRequestConfig}
+export function useAddStock<TData = Awaited<ReturnType<typeof addStock>>, TError = unknown>(
+ inventoryRequest: InventoryRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof addStock>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useAddStock<TData = Awaited<ReturnType<typeof addStock>>, TError = AxiosError<unknown>>(
- inventoryRequest: InventoryRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof addStock>>, TError, TData>>, axios?: AxiosRequestConfig}
+export function useAddStock<TData = Awaited<ReturnType<typeof addStock>>, TError = unknown>(
+ inventoryRequest: InventoryRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof addStock>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 

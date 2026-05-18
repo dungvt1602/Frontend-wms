@@ -8,13 +8,14 @@ import {
   CheckCircle2, ArrowRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useRegister } from "../hooks/useRegister";
 
 /* ─── Vai trò trong hệ thống WMS ─── */
 const roles = [
   { value: "warehouse_staff", label: "Nhân viên kho" },
-  { value: "manager",         label: "Quản lý kho" },
-  { value: "accountant",      label: "Kế toán kho" },
-  { value: "admin",           label: "Quản trị viên" },
+  { value: "manager", label: "Quản lý kho" },
+  { value: "accountant", label: "Kế toán kho" },
+  { value: "admin", label: "Quản trị viên" },
 ];
 
 /* ─── Quy trình 3 bước bên trái ─── */
@@ -64,13 +65,13 @@ const INIT: FormState = {
 
 export default function RegisterForm() {
   const router = useRouter();
-  const [form, setForm]         = useState<FormState>(INIT);
-  const [showPw, setShowPw]     = useState(false);
-  const [showCpw, setShowCpw]   = useState(false);
-  const [isLoading, setLoading] = useState(false);
-  const [success, setSuccess]   = useState(false);
-  const [errors, setErrors]     = useState<FormErrors>({});
+  const [form, setForm] = useState<FormState>(INIT);
+  const [showPw, setShowPw] = useState(false);
+  const [showCpw, setShowCpw] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [errors, setErrors] = useState<FormErrors>({});
   const [isLeaving, setIsLeaving] = useState(false);
+  const registerMutation = useRegister();
 
   function navigate(path: string) {
     setIsLeaving(true);
@@ -123,14 +124,14 @@ export default function RegisterForm() {
   function pwStrength(pw: string): { level: number; label: string; color: string } {
     if (!pw) return { level: 0, label: "", color: "" };
     let score = 0;
-    if (pw.length >= 8)  score++;
+    if (pw.length >= 8) score++;
     if (pw.length >= 12) score++;
     if (/[A-Z]/.test(pw)) score++;
     if (/[0-9]/.test(pw)) score++;
     if (/[^A-Za-z0-9]/.test(pw)) score++;
-    if (score <= 2) return { level: score, label: "Yếu",    color: "#ef4444" };
+    if (score <= 2) return { level: score, label: "Yếu", color: "#ef4444" };
     if (score <= 3) return { level: score, label: "Trung bình", color: "#f59e0b" };
-    return           { level: score, label: "Mạnh",   color: "#10b981" };
+    return { level: score, label: "Mạnh", color: "#10b981" };
   }
 
   const strength = pwStrength(form.password);
@@ -138,16 +139,21 @@ export default function RegisterForm() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!validate()) return;
-    setLoading(true);
+
     setErrors({});
-    try {
-      await new Promise((res) => setTimeout(res, 1800)); // TODO: API call
-      setSuccess(true);
-    } catch {
-      setErrors({ general: "Đã xảy ra lỗi. Vui lòng thử lại sau." });
-    } finally {
-      setLoading(false);
-    }
+
+    registerMutation.mutate({
+      username: form.email, // Map email sang username
+      email: form.email,
+      password: form.password,
+    }, {
+      onSuccess: () => {
+        setSuccess(true);
+      },
+      onError: (error: Error) => {
+        setErrors({ general: error.message });
+      }
+    });
   }
 
   /* ── Success screen ── */
@@ -157,28 +163,27 @@ export default function RegisterForm() {
         <div className="text-center max-w-sm space-y-5">
           <div className="flex justify-center">
             <div className="w-20 h-20 rounded-full flex items-center justify-center"
-                 style={{ background: "linear-gradient(135deg,#6366f1,#4f46e5)" }}>
+              style={{ background: "linear-gradient(135deg,#6366f1,#4f46e5)" }}>
               <CheckCircle2 className="h-10 w-10 text-white" />
             </div>
           </div>
           <div>
             <h2 className="text-2xl font-bold text-slate-900">Đăng ký thành công!</h2>
             <p className="text-slate-500 text-sm mt-2">
-              Tài khoản của bạn đang chờ xét duyệt. Quản trị viên sẽ
-              xác nhận trong vòng <strong>24 giờ</strong>.
+              Hệ thống đã tạo tài khoản và tự động đăng nhập thành công. Bạn có thể bắt đầu sử dụng ngay.
             </p>
           </div>
           <div className="rounded-xl p-4 text-left text-sm space-y-1"
-               style={{ background: "#f5f3ff", border: "1px solid #e0e7ff" }}>
+            style={{ background: "#f5f3ff", border: "1px solid #e0e7ff" }}>
             <p className="text-slate-500">Email đăng ký</p>
             <p className="font-semibold text-indigo-700">{form.email}</p>
           </div>
           <button
-            onClick={() => navigate("/login")}
+            onClick={() => navigate("/dashboard")}
             className="w-full h-11 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90"
             style={{ background: "linear-gradient(135deg,#6366f1,#4f46e5)", boxShadow: "0 4px 15px rgba(99,102,241,0.35)" }}
           >
-            Về trang đăng nhập
+            Vào trang chủ (Dashboard)
           </button>
         </div>
       </div>
@@ -193,18 +198,18 @@ export default function RegisterForm() {
 
       {/* ════════════ LEFT — Branding ════════════ */}
       <div className="hidden lg:flex lg:w-[46%] relative flex-col justify-between p-12 overflow-hidden"
-           style={{ background: "linear-gradient(135deg,#0f172a 0%,#1e1b4b 60%,#0f172a 100%)" }}>
+        style={{ background: "linear-gradient(135deg,#0f172a 0%,#1e1b4b 60%,#0f172a 100%)" }}>
 
         {/* Decorations */}
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-[-80px] left-[-80px] w-[380px] h-[380px] rounded-full"
-               style={{ background: "radial-gradient(circle,rgba(99,102,241,0.15) 0%,transparent 70%)" }} />
+            style={{ background: "radial-gradient(circle,rgba(99,102,241,0.15) 0%,transparent 70%)" }} />
           <div className="absolute bottom-[-100px] right-[-60px] w-[300px] h-[300px] rounded-full"
-               style={{ background: "radial-gradient(circle,rgba(59,130,246,0.1) 0%,transparent 70%)" }} />
+            style={{ background: "radial-gradient(circle,rgba(59,130,246,0.1) 0%,transparent 70%)" }} />
           <svg className="absolute inset-0 w-full h-full opacity-[0.04]" xmlns="http://www.w3.org/2000/svg">
             <defs>
               <pattern id="grid2" width="40" height="40" patternUnits="userSpaceOnUse">
-                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="white" strokeWidth="1"/>
+                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="white" strokeWidth="1" />
               </pattern>
             </defs>
             <rect width="100%" height="100%" fill="url(#grid2)" />
@@ -214,7 +219,7 @@ export default function RegisterForm() {
         {/* Logo */}
         <div className="relative z-10 flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-               style={{ background: "linear-gradient(135deg,#6366f1,#4f46e5)" }}>
+            style={{ background: "linear-gradient(135deg,#6366f1,#4f46e5)" }}>
             <Warehouse className="h-5 w-5 text-white" />
           </div>
           <div>
@@ -227,7 +232,7 @@ export default function RegisterForm() {
         <div className="relative z-10 space-y-10">
           <div className="space-y-3">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium text-indigo-300"
-                 style={{ background: "rgba(99,102,241,0.15)", border: "1px solid rgba(99,102,241,0.3)" }}>
+              style={{ background: "rgba(99,102,241,0.15)", border: "1px solid rgba(99,102,241,0.3)" }}>
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
               Đăng ký tài khoản mới
             </div>
@@ -250,7 +255,7 @@ export default function RegisterForm() {
                 {/* Line connector */}
                 <div className="flex flex-col items-center">
                   <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 text-xs font-bold text-white"
-                       style={{ background: "rgba(99,102,241,0.25)", border: "1px solid rgba(99,102,241,0.4)" }}>
+                    style={{ background: "rgba(99,102,241,0.25)", border: "1px solid rgba(99,102,241,0.4)" }}>
                     {step.num}
                   </div>
                   {i < steps.length - 1 && (
@@ -292,7 +297,7 @@ export default function RegisterForm() {
             <p className="text-slate-400 text-sm">
               Đã có tài khoản?{" "}
               <button type="button" onClick={() => navigate("/login")}
-                      className="text-indigo-600 hover:text-indigo-700 font-medium transition-colors">
+                className="text-indigo-600 hover:text-indigo-700 font-medium transition-colors">
                 Đăng nhập ngay
               </button>
             </p>
@@ -301,7 +306,7 @@ export default function RegisterForm() {
           {/* Error banner */}
           {errors.general && (
             <div className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm text-red-700"
-                 style={{ background: "#fef2f2", border: "1px solid #fecaca" }}>
+              style={{ background: "#fef2f2", border: "1px solid #fecaca" }}>
               <span className="flex-shrink-0 w-5 h-5 rounded-full bg-red-100 flex items-center justify-center text-xs font-bold">!</span>
               {errors.general}
             </div>
@@ -316,7 +321,7 @@ export default function RegisterForm() {
                   type="text" placeholder="Nguyễn Văn A"
                   value={form.fullName}
                   onChange={(e) => set("fullName", e.target.value)}
-                  disabled={isLoading} autoComplete="name"
+                  disabled={registerMutation.isPending} autoComplete="name"
                   className={inputCls(!!errors.fullName)}
                 />
               </InputIcon>
@@ -329,7 +334,7 @@ export default function RegisterForm() {
                   type="email" placeholder="ten@congty.com"
                   value={form.email}
                   onChange={(e) => set("email", e.target.value)}
-                  disabled={isLoading} autoComplete="email"
+                  disabled={registerMutation.isPending} autoComplete="email"
                   className={inputCls(!!errors.email)}
                 />
               </InputIcon>
@@ -343,7 +348,7 @@ export default function RegisterForm() {
                     type="tel" placeholder="0912 345 678"
                     value={form.phone}
                     onChange={(e) => set("phone", e.target.value)}
-                    disabled={isLoading} autoComplete="tel"
+                    disabled={registerMutation.isPending} autoComplete="tel"
                     className={inputCls(!!errors.phone)}
                   />
                 </InputIcon>
@@ -355,7 +360,7 @@ export default function RegisterForm() {
                   <select
                     value={form.role}
                     onChange={(e) => set("role", e.target.value)}
-                    disabled={isLoading}
+                    disabled={registerMutation.isPending}
                     className={cn(
                       inputCls(!!errors.role),
                       "appearance-none cursor-pointer",
@@ -379,13 +384,13 @@ export default function RegisterForm() {
                   type={showPw ? "text" : "password"} placeholder="Tối thiểu 8 ký tự"
                   value={form.password}
                   onChange={(e) => set("password", e.target.value)}
-                  disabled={isLoading} autoComplete="new-password"
+                  disabled={registerMutation.isPending} autoComplete="new-password"
                   className={cn(inputCls(!!errors.password), "pr-11")}
                 />
               </InputIcon>
               <button type="button" onClick={() => setShowPw(!showPw)} tabIndex={-1}
-                      className="absolute right-3.5 top-[34px] text-slate-400 hover:text-slate-600 transition-colors"
-                      aria-label={showPw ? "Ẩn mật khẩu" : "Hiện mật khẩu"}>
+                className="absolute right-3.5 top-[34px] text-slate-400 hover:text-slate-600 transition-colors"
+                aria-label={showPw ? "Ẩn mật khẩu" : "Hiện mật khẩu"}>
                 {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
               {/* Password strength bar */}
@@ -394,7 +399,7 @@ export default function RegisterForm() {
                   <div className="flex gap-1">
                     {[1, 2, 3, 4, 5].map((n) => (
                       <div key={n} className="h-1 flex-1 rounded-full transition-all duration-300"
-                           style={{ background: n <= strength.level ? strength.color : "#e2e8f0" }} />
+                        style={{ background: n <= strength.level ? strength.color : "#e2e8f0" }} />
                     ))}
                   </div>
                   <p className="text-xs" style={{ color: strength.color }}>{strength.label}</p>
@@ -409,13 +414,13 @@ export default function RegisterForm() {
                   type={showCpw ? "text" : "password"} placeholder="Nhập lại mật khẩu"
                   value={form.confirmPassword}
                   onChange={(e) => set("confirmPassword", e.target.value)}
-                  disabled={isLoading} autoComplete="new-password"
+                  disabled={registerMutation.isPending} autoComplete="new-password"
                   className={cn(inputCls(!!errors.confirmPassword), "pr-11")}
                 />
               </InputIcon>
               <button type="button" onClick={() => setShowCpw(!showCpw)} tabIndex={-1}
-                      className="absolute right-3.5 top-[34px] text-slate-400 hover:text-slate-600 transition-colors"
-                      aria-label={showCpw ? "Ẩn" : "Hiện"}>
+                className="absolute right-3.5 top-[34px] text-slate-400 hover:text-slate-600 transition-colors"
+                aria-label={showCpw ? "Ẩn" : "Hiện"}>
                 {showCpw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </Field>
@@ -425,8 +430,8 @@ export default function RegisterForm() {
               <label className="flex items-start gap-2.5 cursor-pointer select-none group">
                 <div className="relative mt-0.5 flex-shrink-0">
                   <input type="checkbox" className="sr-only"
-                         checked={form.agreed}
-                         onChange={(e) => set("agreed", e.target.checked)} />
+                    checked={form.agreed}
+                    onChange={(e) => set("agreed", e.target.checked)} />
                   <div className={cn(
                     "w-4 h-4 rounded border-2 flex items-center justify-center transition-all",
                     form.agreed
@@ -438,7 +443,7 @@ export default function RegisterForm() {
                     {form.agreed && (
                       <svg className="w-2.5 h-2.5 text-white" viewBox="0 0 10 8" fill="none">
                         <path d="M1 4L3.5 6.5L9 1" stroke="currentColor" strokeWidth="1.8"
-                              strokeLinecap="round" strokeLinejoin="round"/>
+                          strokeLinecap="round" strokeLinejoin="round" />
                       </svg>
                     )}
                   </div>
@@ -461,18 +466,18 @@ export default function RegisterForm() {
 
             {/* ── Submit ── */}
             <button
-              type="submit" disabled={isLoading}
+              type="submit" disabled={registerMutation.isPending}
               className={cn(
                 "w-full h-11 rounded-xl text-sm font-semibold text-white",
                 "flex items-center justify-center gap-2 transition-all duration-200",
-                isLoading ? "opacity-70 cursor-not-allowed" : "hover:opacity-90 hover:shadow-lg active:scale-[0.98]"
+                registerMutation.isPending ? "opacity-70 cursor-not-allowed" : "hover:opacity-90 hover:shadow-lg active:scale-[0.98]"
               )}
               style={{
                 background: "linear-gradient(135deg,#6366f1 0%,#4f46e5 100%)",
-                boxShadow: isLoading ? "none" : "0 4px 15px rgba(99,102,241,0.4)",
+                boxShadow: registerMutation.isPending ? "none" : "0 4px 15px rgba(99,102,241,0.4)",
               }}
             >
-              {isLoading ? (
+              {registerMutation.isPending ? (
                 <><Loader2 className="h-4 w-4 animate-spin" /> Đang tạo tài khoản...</>
               ) : "Tạo tài khoản"}
             </button>

@@ -12,13 +12,13 @@ import type { SortObject } from './sortObject';
 export interface PageInventorySummaryResponse {
   totalElements?: number;
   totalPages?: number;
+  first?: boolean;
+  last?: boolean;
+  numberOfElements?: number;
   size?: number;
   content?: InventorySummaryResponse[];
   number?: number;
   sort?: SortObject;
-  first?: boolean;
-  last?: boolean;
-  numberOfElements?: number;
   pageable?: PageableObject;
   empty?: boolean;
 }

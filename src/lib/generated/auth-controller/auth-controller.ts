@@ -20,13 +20,6 @@ import type {
   UseQueryResult
 } from '@tanstack/react-query';
 
-import axios from 'axios';
-import type {
-  AxiosError,
-  AxiosRequestConfig,
-  AxiosResponse
-} from 'axios';
-
 import type {
   ApiResponseAuthResponse,
   ApiResponseTokenPairResponse,
@@ -37,20 +30,26 @@ import type {
   TokenRefreshRequest
 } from '../model';
 
+import { customInstance } from '../../api-client';
 
+
+type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 
 export const register = (
-    registerRequest: RegisterRequest, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<ApiResponseAuthResponse>> => {
+    registerRequest: RegisterRequest,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
 
 
-    return axios.post(
-      `/api/auth/register`,
-      registerRequest,options
-    );
-  }
+      return customInstance<ApiResponseAuthResponse>(
+      {url: `/api/auth/register`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: registerRequest, signal
+    },
+      options);
+    }
 
 
 
@@ -62,16 +61,16 @@ export const getRegisterQueryKey = (registerRequest?: RegisterRequest,) => {
     }
 
 
-export const getRegisterQueryOptions = <TData = Awaited<ReturnType<typeof register>>, TError = AxiosError<unknown>>(registerRequest: RegisterRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof register>>, TError, TData>>, axios?: AxiosRequestConfig}
+export const getRegisterQueryOptions = <TData = Awaited<ReturnType<typeof register>>, TError = unknown>(registerRequest: RegisterRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof register>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
-const {query: queryOptions, axios: axiosOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getRegisterQueryKey(registerRequest);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof register>>> = ({ signal }) => register(registerRequest, { signal, ...axiosOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof register>>> = ({ signal }) => register(registerRequest, requestOptions, signal);
 
 
 
@@ -81,36 +80,36 @@ const {query: queryOptions, axios: axiosOptions} = options ?? {};
 }
 
 export type RegisterQueryResult = NonNullable<Awaited<ReturnType<typeof register>>>
-export type RegisterQueryError = AxiosError<unknown>
+export type RegisterQueryError = unknown
 
 
-export function useRegister<TData = Awaited<ReturnType<typeof register>>, TError = AxiosError<unknown>>(
+export function useRegister<TData = Awaited<ReturnType<typeof register>>, TError = unknown>(
  registerRequest: RegisterRequest, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof register>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof register>>,
           TError,
           Awaited<ReturnType<typeof register>>
         > , 'initialData'
-      >, axios?: AxiosRequestConfig}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useRegister<TData = Awaited<ReturnType<typeof register>>, TError = AxiosError<unknown>>(
+export function useRegister<TData = Awaited<ReturnType<typeof register>>, TError = unknown>(
  registerRequest: RegisterRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof register>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof register>>,
           TError,
           Awaited<ReturnType<typeof register>>
         > , 'initialData'
-      >, axios?: AxiosRequestConfig}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useRegister<TData = Awaited<ReturnType<typeof register>>, TError = AxiosError<unknown>>(
- registerRequest: RegisterRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof register>>, TError, TData>>, axios?: AxiosRequestConfig}
+export function useRegister<TData = Awaited<ReturnType<typeof register>>, TError = unknown>(
+ registerRequest: RegisterRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof register>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useRegister<TData = Awaited<ReturnType<typeof register>>, TError = AxiosError<unknown>>(
- registerRequest: RegisterRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof register>>, TError, TData>>, axios?: AxiosRequestConfig}
+export function useRegister<TData = Awaited<ReturnType<typeof register>>, TError = unknown>(
+ registerRequest: RegisterRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof register>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -127,15 +126,18 @@ export function useRegister<TData = Awaited<ReturnType<typeof register>>, TError
 
 
 export const refresh = (
-    tokenRefreshRequest: TokenRefreshRequest, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<ApiResponseTokenPairResponse>> => {
+    tokenRefreshRequest: TokenRefreshRequest,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
 
 
-    return axios.post(
-      `/api/auth/refresh`,
-      tokenRefreshRequest,options
-    );
-  }
+      return customInstance<ApiResponseTokenPairResponse>(
+      {url: `/api/auth/refresh`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: tokenRefreshRequest, signal
+    },
+      options);
+    }
 
 
 
@@ -147,16 +149,16 @@ export const getRefreshQueryKey = (tokenRefreshRequest?: TokenRefreshRequest,) =
     }
 
 
-export const getRefreshQueryOptions = <TData = Awaited<ReturnType<typeof refresh>>, TError = AxiosError<unknown>>(tokenRefreshRequest: TokenRefreshRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof refresh>>, TError, TData>>, axios?: AxiosRequestConfig}
+export const getRefreshQueryOptions = <TData = Awaited<ReturnType<typeof refresh>>, TError = unknown>(tokenRefreshRequest: TokenRefreshRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof refresh>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
-const {query: queryOptions, axios: axiosOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getRefreshQueryKey(tokenRefreshRequest);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof refresh>>> = ({ signal }) => refresh(tokenRefreshRequest, { signal, ...axiosOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof refresh>>> = ({ signal }) => refresh(tokenRefreshRequest, requestOptions, signal);
 
 
 
@@ -166,36 +168,36 @@ const {query: queryOptions, axios: axiosOptions} = options ?? {};
 }
 
 export type RefreshQueryResult = NonNullable<Awaited<ReturnType<typeof refresh>>>
-export type RefreshQueryError = AxiosError<unknown>
+export type RefreshQueryError = unknown
 
 
-export function useRefresh<TData = Awaited<ReturnType<typeof refresh>>, TError = AxiosError<unknown>>(
+export function useRefresh<TData = Awaited<ReturnType<typeof refresh>>, TError = unknown>(
  tokenRefreshRequest: TokenRefreshRequest, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof refresh>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof refresh>>,
           TError,
           Awaited<ReturnType<typeof refresh>>
         > , 'initialData'
-      >, axios?: AxiosRequestConfig}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useRefresh<TData = Awaited<ReturnType<typeof refresh>>, TError = AxiosError<unknown>>(
+export function useRefresh<TData = Awaited<ReturnType<typeof refresh>>, TError = unknown>(
  tokenRefreshRequest: TokenRefreshRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof refresh>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof refresh>>,
           TError,
           Awaited<ReturnType<typeof refresh>>
         > , 'initialData'
-      >, axios?: AxiosRequestConfig}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useRefresh<TData = Awaited<ReturnType<typeof refresh>>, TError = AxiosError<unknown>>(
- tokenRefreshRequest: TokenRefreshRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof refresh>>, TError, TData>>, axios?: AxiosRequestConfig}
+export function useRefresh<TData = Awaited<ReturnType<typeof refresh>>, TError = unknown>(
+ tokenRefreshRequest: TokenRefreshRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof refresh>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useRefresh<TData = Awaited<ReturnType<typeof refresh>>, TError = AxiosError<unknown>>(
- tokenRefreshRequest: TokenRefreshRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof refresh>>, TError, TData>>, axios?: AxiosRequestConfig}
+export function useRefresh<TData = Awaited<ReturnType<typeof refresh>>, TError = unknown>(
+ tokenRefreshRequest: TokenRefreshRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof refresh>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -212,15 +214,18 @@ export function useRefresh<TData = Awaited<ReturnType<typeof refresh>>, TError =
 
 
 export const logout = (
-    logoutRequest: LogoutRequest, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<ApiResponseVoid>> => {
+    logoutRequest: LogoutRequest,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
 
 
-    return axios.post(
-      `/api/auth/logout`,
-      logoutRequest,options
-    );
-  }
+      return customInstance<ApiResponseVoid>(
+      {url: `/api/auth/logout`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: logoutRequest, signal
+    },
+      options);
+    }
 
 
 
@@ -232,16 +237,16 @@ export const getLogoutQueryKey = (logoutRequest?: LogoutRequest,) => {
     }
 
 
-export const getLogoutQueryOptions = <TData = Awaited<ReturnType<typeof logout>>, TError = AxiosError<unknown>>(logoutRequest: LogoutRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof logout>>, TError, TData>>, axios?: AxiosRequestConfig}
+export const getLogoutQueryOptions = <TData = Awaited<ReturnType<typeof logout>>, TError = unknown>(logoutRequest: LogoutRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof logout>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
-const {query: queryOptions, axios: axiosOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getLogoutQueryKey(logoutRequest);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof logout>>> = ({ signal }) => logout(logoutRequest, { signal, ...axiosOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof logout>>> = ({ signal }) => logout(logoutRequest, requestOptions, signal);
 
 
 
@@ -251,36 +256,36 @@ const {query: queryOptions, axios: axiosOptions} = options ?? {};
 }
 
 export type LogoutQueryResult = NonNullable<Awaited<ReturnType<typeof logout>>>
-export type LogoutQueryError = AxiosError<unknown>
+export type LogoutQueryError = unknown
 
 
-export function useLogout<TData = Awaited<ReturnType<typeof logout>>, TError = AxiosError<unknown>>(
+export function useLogout<TData = Awaited<ReturnType<typeof logout>>, TError = unknown>(
  logoutRequest: LogoutRequest, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof logout>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof logout>>,
           TError,
           Awaited<ReturnType<typeof logout>>
         > , 'initialData'
-      >, axios?: AxiosRequestConfig}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useLogout<TData = Awaited<ReturnType<typeof logout>>, TError = AxiosError<unknown>>(
+export function useLogout<TData = Awaited<ReturnType<typeof logout>>, TError = unknown>(
  logoutRequest: LogoutRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof logout>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof logout>>,
           TError,
           Awaited<ReturnType<typeof logout>>
         > , 'initialData'
-      >, axios?: AxiosRequestConfig}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useLogout<TData = Awaited<ReturnType<typeof logout>>, TError = AxiosError<unknown>>(
- logoutRequest: LogoutRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof logout>>, TError, TData>>, axios?: AxiosRequestConfig}
+export function useLogout<TData = Awaited<ReturnType<typeof logout>>, TError = unknown>(
+ logoutRequest: LogoutRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof logout>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useLogout<TData = Awaited<ReturnType<typeof logout>>, TError = AxiosError<unknown>>(
- logoutRequest: LogoutRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof logout>>, TError, TData>>, axios?: AxiosRequestConfig}
+export function useLogout<TData = Awaited<ReturnType<typeof logout>>, TError = unknown>(
+ logoutRequest: LogoutRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof logout>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -297,15 +302,18 @@ export function useLogout<TData = Awaited<ReturnType<typeof logout>>, TError = A
 
 
 export const login = (
-    loginRequest: LoginRequest, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<ApiResponseAuthResponse>> => {
+    loginRequest: LoginRequest,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
 
 
-    return axios.post(
-      `/api/auth/login`,
-      loginRequest,options
-    );
-  }
+      return customInstance<ApiResponseAuthResponse>(
+      {url: `/api/auth/login`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: loginRequest, signal
+    },
+      options);
+    }
 
 
 
@@ -317,16 +325,16 @@ export const getLoginQueryKey = (loginRequest?: LoginRequest,) => {
     }
 
 
-export const getLoginQueryOptions = <TData = Awaited<ReturnType<typeof login>>, TError = AxiosError<unknown>>(loginRequest: LoginRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof login>>, TError, TData>>, axios?: AxiosRequestConfig}
+export const getLoginQueryOptions = <TData = Awaited<ReturnType<typeof login>>, TError = unknown>(loginRequest: LoginRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof login>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
-const {query: queryOptions, axios: axiosOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getLoginQueryKey(loginRequest);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof login>>> = ({ signal }) => login(loginRequest, { signal, ...axiosOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof login>>> = ({ signal }) => login(loginRequest, requestOptions, signal);
 
 
 
@@ -336,36 +344,36 @@ const {query: queryOptions, axios: axiosOptions} = options ?? {};
 }
 
 export type LoginQueryResult = NonNullable<Awaited<ReturnType<typeof login>>>
-export type LoginQueryError = AxiosError<unknown>
+export type LoginQueryError = unknown
 
 
-export function useLogin<TData = Awaited<ReturnType<typeof login>>, TError = AxiosError<unknown>>(
+export function useLogin<TData = Awaited<ReturnType<typeof login>>, TError = unknown>(
  loginRequest: LoginRequest, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof login>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof login>>,
           TError,
           Awaited<ReturnType<typeof login>>
         > , 'initialData'
-      >, axios?: AxiosRequestConfig}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useLogin<TData = Awaited<ReturnType<typeof login>>, TError = AxiosError<unknown>>(
+export function useLogin<TData = Awaited<ReturnType<typeof login>>, TError = unknown>(
  loginRequest: LoginRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof login>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof login>>,
           TError,
           Awaited<ReturnType<typeof login>>
         > , 'initialData'
-      >, axios?: AxiosRequestConfig}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useLogin<TData = Awaited<ReturnType<typeof login>>, TError = AxiosError<unknown>>(
- loginRequest: LoginRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof login>>, TError, TData>>, axios?: AxiosRequestConfig}
+export function useLogin<TData = Awaited<ReturnType<typeof login>>, TError = unknown>(
+ loginRequest: LoginRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof login>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useLogin<TData = Awaited<ReturnType<typeof login>>, TError = AxiosError<unknown>>(
- loginRequest: LoginRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof login>>, TError, TData>>, axios?: AxiosRequestConfig}
+export function useLogin<TData = Awaited<ReturnType<typeof login>>, TError = unknown>(
+ loginRequest: LoginRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof login>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -382,15 +390,16 @@ export function useLogin<TData = Awaited<ReturnType<typeof login>>, TError = Axi
 
 
 export const hello = (
-     options?: AxiosRequestConfig
- ): Promise<AxiosResponse<string>> => {
+
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
 
 
-    return axios.get(
-      `/api/auth/`,{
-    ...options,}
-    );
-  }
+      return customInstance<string>(
+      {url: `/api/auth/`, method: 'GET', signal
+    },
+      options);
+    }
 
 
 
@@ -402,16 +411,16 @@ export const getHelloQueryKey = () => {
     }
 
 
-export const getHelloQueryOptions = <TData = Awaited<ReturnType<typeof hello>>, TError = AxiosError<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof hello>>, TError, TData>>, axios?: AxiosRequestConfig}
+export const getHelloQueryOptions = <TData = Awaited<ReturnType<typeof hello>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof hello>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
-const {query: queryOptions, axios: axiosOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getHelloQueryKey();
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof hello>>> = ({ signal }) => hello({ signal, ...axiosOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof hello>>> = ({ signal }) => hello(requestOptions, signal);
 
 
 
@@ -421,36 +430,36 @@ const {query: queryOptions, axios: axiosOptions} = options ?? {};
 }
 
 export type HelloQueryResult = NonNullable<Awaited<ReturnType<typeof hello>>>
-export type HelloQueryError = AxiosError<unknown>
+export type HelloQueryError = unknown
 
 
-export function useHello<TData = Awaited<ReturnType<typeof hello>>, TError = AxiosError<unknown>>(
+export function useHello<TData = Awaited<ReturnType<typeof hello>>, TError = unknown>(
   options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof hello>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof hello>>,
           TError,
           Awaited<ReturnType<typeof hello>>
         > , 'initialData'
-      >, axios?: AxiosRequestConfig}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useHello<TData = Awaited<ReturnType<typeof hello>>, TError = AxiosError<unknown>>(
+export function useHello<TData = Awaited<ReturnType<typeof hello>>, TError = unknown>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof hello>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof hello>>,
           TError,
           Awaited<ReturnType<typeof hello>>
         > , 'initialData'
-      >, axios?: AxiosRequestConfig}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useHello<TData = Awaited<ReturnType<typeof hello>>, TError = AxiosError<unknown>>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof hello>>, TError, TData>>, axios?: AxiosRequestConfig}
+export function useHello<TData = Awaited<ReturnType<typeof hello>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof hello>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useHello<TData = Awaited<ReturnType<typeof hello>>, TError = AxiosError<unknown>>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof hello>>, TError, TData>>, axios?: AxiosRequestConfig}
+export function useHello<TData = Awaited<ReturnType<typeof hello>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof hello>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
